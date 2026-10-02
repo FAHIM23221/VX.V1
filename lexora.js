@@ -424,7 +424,7 @@ $("matchNext").onclick=()=>{
 
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");
- ["learn","build","match","search","quiz","progress","review","coach"].forEach(v=>{const el=$(v+"View");if(el)el.style.display=t.dataset.view===v?"block":"none";});
+ ["learn","build","match","search","quiz","progress","review","coach","profile","admin"].forEach(v=>{const el=$(v+"View");if(el)el.style.display=t.dataset.view===v?"block":"none";});
  if(t.dataset.view==="match") startMatching();
  if(t.dataset.view==="quiz") startQuiz(); if(t.dataset.view==="review") renderSmartReview(); if(t.dataset.view==="coach") renderCoach();
 });
@@ -592,6 +592,7 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
 /* ===== Lexora Firebase Account + Cloud Sync ===== */
 (function(){
   const firebaseConfig=window.LEXORA_FIREBASE_CONFIG;
+  const ADMIN_EMAIL="fahim500k@gmail.com";
   const USERS_KEY_PREFIX="lexora_user_";
   let currentUser=null;
   let syncing=false;
@@ -614,12 +615,21 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
   function showApp(){
     $("authOverlay")?.classList.add("hidden");
     if($("accountName")) $("accountName").textContent=currentUser?.displayName||"Account";
-    if($("accountBtn")) $("accountBtn").textContent="Logout";
+    if($("accountBtn")) $("accountBtn").textContent="Profile";
+    if($("logoutBtn")) $("logoutBtn").classList.remove("hidden");
+    window.lexoraCurrentUser=currentUser;
+    window.lexoraIsAdmin=normalizeEmail(currentUser?.email||"")===ADMIN_EMAIL;
+    if(window.lexoraIsAdmin && !document.getElementById("adminTab")){
+      const tabs=document.querySelector(".tabs");
+      if(tabs){const b=document.createElement("button");b.id="adminTab";b.className="tab";b.textContent="Admin";b.onclick=()=>openAdminView();tabs.appendChild(b);}
+    }
   }
   function showAuth(){
     $("authOverlay")?.classList.remove("hidden");
     if($("accountName")) $("accountName").textContent="";
-    if($("accountBtn")) $("accountBtn").textContent="Account";
+    if($("accountBtn")) $("accountBtn").textContent="Profile";
+    if($("logoutBtn")) $("logoutBtn").classList.add("hidden");
+    window.lexoraCurrentUser=null; window.lexoraIsAdmin=false;
   }
   function saveLocalSnapshot(){
     if(!currentUser) return;
@@ -777,10 +787,71 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
     }
   };
 
-  $("accountBtn").onclick=async()=>{
-    if(currentUser){await firebase.auth().signOut();return;}
-    showAuth();
-  };
+  async function changeOwnPassword(){
+    const u=currentUser;
+    const current=$("currentPassword")?.value||"";
+    const next=$("newPassword")?.value||"";
+    const out=$("passwordMsg");
+    if(!u || !u.email) throw new Error("No authenticated account.");
+    if(!current || !next) throw new Error("Current এবং new password দুটোই দাও।");
+    if(next.length<6) throw new Error("New password কমপক্ষে 6 characters হতে হবে।");
+    const cred=firebase.auth.EmailAuthProvider.credential(u.email,current);
+    await u.reauthenticateWithCredential(cred);
+    await u.updatePassword(next);
+    if(out){out.textContent="Password successfully changed.";out.className="auth-msg good";}
+    $("currentPassword").value=""; $("newPassword").value="";
+  }
+
+  async function loadAdminUsers(){
+    if(!currentUser || normalizeEmail(currentUser.email)!==ADMIN_EMAIL) return;
+    const rows=$("adminUserRows"), msgEl=$("adminMsg");
+    if(!rows) return;
+    msgEl.textContent="Loading users..."; msgEl.className="auth-msg";
+    try{
+      const snap=await window.lexoraDb.collection("users").get();
+      window.__lexoraAdminUsers=[];
+      snap.forEach(doc=>window.__lexoraAdminUsers.push({uid:doc.id,...doc.data()}));
+      window.__lexoraAdminUsers.sort((a,b)=>String(a.name||a.email||"").localeCompare(String(b.name||b.email||"")));
+      renderAdminUsers();
+      $("adminUserCount").textContent=String(window.__lexoraAdminUsers.length);
+      msgEl.textContent="Users loaded."; msgEl.className="auth-msg good";
+    }catch(e){
+      console.error(e); msgEl.textContent="Admin data load failed: "+(e.message||e); msgEl.className="auth-msg bad";
+    }
+  }
+  function renderAdminUsers(){
+    const rows=$("adminUserRows"); if(!rows) return;
+    const q=( $("adminSearch")?.value||"" ).trim().toLowerCase();
+    const list=(window.__lexoraAdminUsers||[]).filter(u=>`${u.name||""} ${u.email||""} ${u.phone||""} ${u.uid||""}`.toLowerCase().includes(q));
+    rows.innerHTML=list.map(u=>`<tr><td>${escapeHtml(u.name||"—")}</td><td>${escapeHtml(u.email||"—")}</td><td>${escapeHtml(u.phone||"—")}</td><td title="${escapeHtml(u.uid||"")}">${escapeHtml((u.uid||"").slice(0,12))}</td><td><button data-admin-uid="${escapeHtml(u.uid)}">View</button></td></tr>`).join("") || `<tr><td colspan="5">No users found.</td></tr>`;
+  }
+  function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+  function openProfileView(){
+    document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+    $("profileView")?.style.setProperty('display','block');
+    if(!currentUser)return;
+    $("profileName").textContent=currentUser.displayName||"—";
+    $("profileEmail").textContent=currentUser.email||"—";
+    $("profilePhone").textContent=currentUser._lexoraPhone||currentUser.phoneNumber||"—";
+    $("profileRole").textContent=normalizeEmail(currentUser.email)===ADMIN_EMAIL?"Admin":"User";
+  }
+  function openAdminView(){
+    if(normalizeEmail(currentUser?.email||"")!==ADMIN_EMAIL)return;
+    document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+    $("adminView")?.style.setProperty('display','block');
+    loadAdminUsers();
+  }
+  $("accountBtn").onclick=()=>openProfileView();
+  $("logoutBtn").onclick=async()=>{await firebase.auth().signOut();};
+  $("changePasswordBtn")?.addEventListener('click',async()=>{try{await changeOwnPassword();}catch(e){$("passwordMsg").textContent=firebaseMessage(e);$("passwordMsg").className="auth-msg bad";}});
+  $("adminRefresh")?.addEventListener('click',loadAdminUsers);
+  $("adminSearch")?.addEventListener('input',renderAdminUsers);
+  $("adminCloseSelected")?.addEventListener('click',()=>$("adminSelected").style.display='none');
+  $("adminUserRows")?.addEventListener('click',e=>{const b=e.target.closest('[data-admin-uid]');if(!b)return;const u=(window.__lexoraAdminUsers||[]).find(x=>x.uid===b.dataset.adminUid);if(!u)return;$("selectedName").textContent=u.name||"—";$("selectedEmail").textContent=u.email||"—";$("selectedPhone").textContent=u.phone||"—";$("selectedUid").textContent=u.uid;$("adminSelected").style.display='block';});
+
+  window.openLexoraAdmin=openAdminView;
+  window.openLexoraProfile=openProfileView;
+  window.lexoraAdminEmail=ADMIN_EMAIL;
 
   if(!window.firebase || !firebaseConfig){
     msg("Firebase SDK/config পাওয়া যায়নি।","bad");
