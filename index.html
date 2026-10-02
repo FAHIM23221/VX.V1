@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5b5ce2">
+<title>VocabX — Learn English Naturally</title>
+<style>
+:root{--bg:#f7f8fc;--card:#fff;--text:#121522;--muted:#72798b;--line:#e7e9f0;--primary:#5b5ce2;--soft:#eef0ff;--ok:#15803d;--bad:#b42318;--shadow:0 12px 40px rgba(20,25,50,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}button{cursor:pointer}.app{max-width:980px;margin:auto;padding:0 16px 30px}
+header{height:68px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:9px;font-size:21px;font-weight:900}.logo{width:35px;height:35px;border-radius:11px;background:var(--primary);color:#fff;display:grid;place-items:center}.brand i{font-style:normal;color:var(--primary)}.icon{width:42px;height:42px;border:1px solid var(--line);border-radius:13px;background:var(--card);color:var(--text)}
+.hero{padding:35px 0 24px}.kicker{margin:0 0 8px;color:var(--primary);font-size:10px;font-weight:900;letter-spacing:1.7px}.hero h1{font-size:clamp(40px,8vw,68px);line-height:.98;letter-spacing:-3px;margin:0}.hero h1 span{color:var(--primary)}.hero p:last-child{color:var(--muted);line-height:1.7;max-width:680px}
+.card,.panel,.progress{background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}.progress{padding:18px;margin:10px 0 32px}.phead{display:flex;justify-content:space-between;margin-bottom:11px}.phead small{display:block;color:var(--muted)}.phead b{display:block;margin-top:3px}.pct{color:var(--primary);font-weight:900}.track{height:8px;background:#eceef5;border-radius:20px;overflow:hidden}.fill{height:100%;width:0;background:var(--primary);transition:.3s}
+.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:14px}.tab{white-space:nowrap;border:1px solid var(--line);background:var(--card);color:var(--muted);padding:10px 15px;border-radius:99px;font-weight:800}.tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.panel{padding:20px;margin-bottom:18px}.panel h2{margin:0;font-size:25px}.muted{color:var(--muted);line-height:1.65}
+.lesson{display:grid;grid-template-columns:1fr 1fr;gap:14px}.wordcard{border:1px solid var(--line);border-radius:20px;padding:20px;text-align:center}.tag{display:inline-block;padding:6px 9px;background:var(--soft);color:var(--primary);border-radius:99px;font-size:10px;font-weight:900;text-transform:uppercase}.word{font-size:55px;letter-spacing:-3px;font-weight:900;margin:18px 0 3px}.meaning{font-size:22px;font-weight:800;margin:0}.pron{color:var(--muted);font-size:13px}.example{background:var(--bg);border-radius:16px;padding:14px;text-align:left;margin-top:17px}.example small{color:var(--primary);font-weight:900}.example p{font-weight:750;margin:5px 0}.example span{color:var(--muted);font-size:13px}.row{display:flex;gap:9px;margin-top:13px}.btn{border:0;border-radius:13px;padding:13px 15px;font-weight:850;flex:1}.primary{background:var(--primary);color:#fff}.secondary{background:var(--soft);color:var(--primary)}
+.patterns{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:17px 0}.pattern{padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--card);text-align:left;color:var(--text)}.pattern b{display:block;font-size:13px}.pattern small{display:block;color:var(--muted);margin-top:5px}.pattern.active{border-color:var(--primary);background:var(--soft)}
+.builder{display:grid;gap:10px}.step{display:grid;grid-template-columns:32px 1fr;gap:9px;align-items:center}.step>span{width:30px;height:30px;border-radius:50%;background:var(--soft);color:var(--primary);display:grid;place-items:center;font-weight:900}.step label{display:block;font-size:10px;color:var(--muted);font-weight:900;margin-bottom:5px}.step select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.validation{padding:12px;border-radius:13px;margin-top:12px;font-size:13px;font-weight:750}.good{background:#ebf8ef;color:var(--ok)}.bad{background:#fff0ef;color:var(--bad)}
+.result{margin-top:12px;background:var(--soft);padding:18px;border-radius:18px;text-align:center}.result .en{font-size:24px;font-weight:850;margin:7px 0}.result .bn{color:var(--muted);margin:0}.why{text-align:left;background:var(--card);border:1px solid var(--line);padding:12px;border-radius:13px;margin-top:13px;font-size:13px;line-height:1.6}.why b{display:block;color:var(--primary);font-size:10px;margin-bottom:3px}
+.practice{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}.practice h3{margin:0;font-size:20px}.input{width:100%;padding:14px;border-radius:13px;border:1px solid var(--line);background:var(--bg);color:var(--text);outline:none;margin-top:10px}.feedback{display:none;margin-top:10px;padding:14px;border-radius:13px;line-height:1.6;font-size:13px}.feedback.show{display:block}.feedback.ok{background:#ebf8ef}.feedback.no{background:#fff0ef}
+.search{display:flex;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:0 12px;margin:15px 0}.search input{width:100%;border:0;outline:0;background:transparent;padding:13px;color:var(--text)}.results{display:grid;gap:8px}.res{display:flex;justify-content:space-between;border:1px solid var(--line);border-radius:13px;padding:12px}.res small{color:var(--muted)}
+.dark{--bg:#090d17;--card:#111725;--text:#f4f6ff;--muted:#9da6b8;--line:#252d3e;--soft:#191e3c;--shadow:0 15px 50px rgba(0,0,0,.28)}.dark .track{background:#222b3d}.dark .good{background:#113622}.dark .bad{background:#3b1b1a}
+footer{padding:20px 0;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:20px}
+
+/* ===== VocabX v2 — Progress & Smart Review ===== */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}.stat-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px}.stat-card small{display:block;color:var(--muted);font-size:11px;font-weight:800}.stat-card b{display:block;font-size:25px;margin-top:4px;color:var(--text)}.stat-card span{font-size:12px;color:var(--muted)}.today-card{margin-top:12px;padding:17px;border:1px solid var(--line);border-radius:20px;background:var(--card)}.today-head{display:flex;justify-content:space-between;align-items:center}.today-head b{font-size:16px}.mini-track{height:8px;background:var(--bg);border-radius:99px;overflow:hidden;margin:11px 0 7px}.mini-fill{height:100%;width:0;background:var(--primary);border-radius:99px;transition:width .35s}.review-list{display:grid;gap:8px;margin-top:12px}.review-item{display:flex;align-items:center;justify-content:space-between;padding:12px 13px;border:1px solid var(--line);border-radius:15px;background:var(--card)}.review-item strong{font-size:15px}.review-item small{color:var(--muted)}.badge{padding:5px 8px;border-radius:99px;font-size:10px;font-weight:900}.badge.due{background:#fff0ef;color:var(--bad)}.badge.strong{background:#eaf8ef;color:var(--ok)}.mode-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}.mode-btn{padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--card);font-weight:850;text-align:left}.mode-btn.active{border-color:var(--primary);background:var(--soft)}
+@media(max-width:420px){.stat-grid{grid-template-columns:1fr 1fr}.stat-card b{font-size:22px}}
+@media(max-width:700px){.lesson{grid-template-columns:1fr}.patterns{grid-template-columns:1fr}.hero h1{letter-spacing:-2px}.word{font-size:48px}}
+
+.match-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.match-head h2{margin:0}.match-progress{min-width:62px;text-align:center;background:var(--soft);color:var(--primary);border-radius:15px;padding:8px 7px}.match-progress b{display:block;font-size:18px}.match-progress small{font-size:9px;color:var(--muted);font-weight:800}.match-board{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.match-column{min-width:0}.match-title{font-size:10px;font-weight:900;letter-spacing:1.3px;color:var(--muted);margin:0 0 8px;padding-left:4px}.match-list{display:grid;gap:8px}.match-card{width:100%;min-height:52px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:14px;padding:11px 8px;font-weight:800;font-size:14px;line-height:1.25;display:flex;align-items:center;justify-content:center;text-align:center;transition:transform .16s ease,background .18s ease,border-color .18s ease,opacity .2s ease,box-shadow .18s ease}.match-card:not(:disabled):active{transform:scale(.97)}.match-card.selected{border-color:var(--primary);background:var(--soft);box-shadow:0 0 0 2px rgba(91,92,226,.12);transform:translateY(-1px)}.match-card.correct{background:#eaf8ef;border-color:#38a169;color:#176b39;animation:matchPop .28s ease}.match-card.wrong{background:#fff0ef;border-color:#e05252;color:#a52222;animation:matchShake .32s ease}.match-card.locked{opacity:.5;cursor:default;pointer-events:none}.match-status{min-height:45px;margin-top:14px;padding:12px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--line);font-size:13px;font-weight:750;text-align:center;display:flex;align-items:center;justify-content:center}.match-status.good{background:#eaf8ef;color:var(--ok);border-color:#b9e4c8}.match-status.error{background:#fff0ef;color:var(--bad);border-color:#f1b9b5}.match-next{width:100%;margin-top:10px}.match-next:disabled{opacity:.45;cursor:not-allowed}@keyframes matchPop{0%{transform:scale(.96)}60%{transform:scale(1.03)}100%{transform:scale(1)}}@keyframes matchShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}.dark .match-card.correct{background:#123b24;color:#8de0aa}.dark .match-card.wrong{background:#3b1c1c;color:#ffaaa5}.dark .match-status.good{background:#123b24}.dark .match-status.error{background:#3b1c1c}
+@media(max-width:700px){.match-board{gap:7px}.match-card{min-height:50px;font-size:13px;padding:10px 5px}.match-head{align-items:center}}
+
+/* ===== VocabX Quiz — matched with the main VocabX UI ===== */
+.quiz-panel{display:none}
+.quiz-panel.show{display:block}
+.quiz-card{
+  background:#fff;
+  border:1px solid #e2e5ee;
+  border-radius:30px;
+  padding:24px 22px;
+  box-shadow:0 10px 30px rgba(25,35,65,.07);
+}
+.quiz-head{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:14px;margin:0 0 14px;
+}
+.quiz-kicker{
+  margin:0 0 10px;font-size:13px;letter-spacing:1px;
+  font-weight:900;color:#5b5bdc;
+}
+.quiz-head h2{
+  margin:0;color:#151827;font-size:29px;line-height:1.15;
+  letter-spacing:-.5px;
+}
+.quiz-sub{margin:7px 0 0;color:#858a9b;font-size:15px;line-height:1.5}
+.quiz-score{
+  min-width:68px;text-align:center;background:#f0f0ff;
+  border-radius:18px;padding:10px 8px;
+}
+.quiz-score b{display:block;color:#5b5bdc;font-size:21px}
+.quiz-score small{color:#777b8d;font-weight:800;font-size:12px}
+.quiz-progress{
+  height:9px;background:#e9eaf5;border-radius:99px;overflow:hidden;margin:6px 0 24px
+}
+.quiz-progress>div{
+  height:100%;width:0;background:#5b5bdc;border-radius:99px;
+  transition:width .35s ease
+}
+.quiz-question-card{
+  background:#f7f8fc;
+  border:1px solid #e3e5ef;
+  border-radius:24px;
+  padding:22px 18px 10px;
+  margin-bottom:15px;
+  box-shadow:0 5px 18px rgba(25,35,65,.04);
+}
+.quiz-question-label{
+  font-size:16px;color:#7d8292;margin-bottom:12px;line-height:1.45;
+}
+.quiz-question{
+  font-size:42px;font-weight:900;line-height:1.05;
+  margin:0 0 19px;color:#171a28;letter-spacing:-.8px;
+}
+.quiz-options{display:grid;gap:9px}
+.quiz-option{
+  width:100%;display:flex;align-items:center;gap:13px;
+  text-align:left;background:#fff;border:1px solid #e0e2eb;
+  border-radius:16px;padding:14px 13px;
+  font-size:18px;font-weight:750;color:#242735;
+  transition:transform .15s,background .15s,border-color .15s,box-shadow .15s;
+}
+.quiz-option:not(:disabled):active{transform:scale(.985)}
+.quiz-letter{
+  width:34px;height:34px;border:1.5px solid #aeb2c0;
+  border-radius:50%;display:grid;place-items:center;flex:none;
+  font-size:14px;color:#656a79;background:#fff;
+}
+.quiz-option.selected{
+  border-color:#7776e8;background:#f3f2ff;
+  box-shadow:0 0 0 2px rgba(91,91,220,.08)
+}
+.quiz-option.correct{
+  color:#16704d;background:#edf9f3;border-color:#8fd1b3;
+  animation:quizPop .25s ease
+}
+.quiz-option.correct .quiz-letter{
+  background:#1f9b6a;border-color:#1f9b6a;color:#fff
+}
+.quiz-option.wrong{
+  color:#b23c48;background:#fff1f2;border-color:#e7a4aa;
+  animation:quizShake .28s ease
+}
+.quiz-option.wrong .quiz-letter{
+  background:#d94f5c;border-color:#d94f5c;color:#fff
+}
+.quiz-option:disabled{cursor:default}
+.quiz-status{
+  min-height:42px;margin:0 0 10px;padding:10px 13px;
+  border-radius:14px;background:#f5f6fa;color:#73798a;
+  font-size:14px;font-weight:750;line-height:1.45;
+}
+.quiz-status.good{color:#16704d;background:#edf9f3}
+.quiz-status.bad{color:#b23c48;background:#fff1f2}
+.quiz-next{
+  width:100%;border:0;border-radius:16px;padding:16px;
+  background:#aeb2c0;color:#fff;font-weight:900;font-size:18px;
+  transition:.18s transform,.18s background
+}
+.quiz-next:not(:disabled){background:#5b5bdc}
+.quiz-next:not(:disabled):active{transform:scale(.985)}
+.quiz-next:disabled{opacity:1}
+.quiz-result{text-align:center;padding:28px 10px}
+.quiz-result .big{font-size:58px;font-weight:950;color:#5b5bdc}
+.quiz-result h3{font-size:28px;margin:8px 0;color:#171a28}
+.quiz-result p{color:#777d8e;line-height:1.6}
+@keyframes quizShake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+@keyframes quizPop{50%{transform:scale(1.02)}}
+@media(max-width:520px){.quiz-card{padding:18px}.quiz-head h2{font-size:27px}.quiz-question{font-size:25px}}
+
+
+.review-list{display:grid;gap:8px}
+.review-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--border);border-radius:14px;background:var(--card)}
+.badge{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900}
+.badge.due{background:#fff0f1;color:#c74350}
+.badge.strong{background:#ecf8f1;color:#16805a}
+
+.confidence-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.confidence-btn{border:1px solid var(--border);background:var(--card);border-radius:12px;padding:11px 8px;font-weight:800;cursor:pointer}
+.confidence-btn:hover{transform:translateY(-1px)}
+.example-box{padding:12px;border-radius:12px;background:var(--soft);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand"><span class="logo">V</span>Vocab<i>X</i></div><button class="icon" id="theme">☾</button></header>
+
+<section class="hero">
+<p class="kicker">ENGLISH FROM ZERO</p>
+<h1>Learn English.<br><span>Without fear.</span></h1>
+<p><span id="heroStreak" style="font-weight:800;color:var(--primary)">🔥 <span id="heroStreakNum">0</span> day streak</span><br>Grammar মুখস্থ নয়। প্রতিদিনের শব্দ, ছোট sentence, real-life conversation এবং practice-এর মাধ্যমে ধীরে ধীরে English ব্যবহার করতে শেখো।</p>
+</section>
+
+<section class="progress">
+<div class="phead"><div><small>আজকের শেখা</small><b><span id="learnedCount">0</span> / 10 words</b></div><span class="pct" id="pct">0%</span></div>
+<div class="track"><div class="fill" id="fill"></div></div>
+</section>
+
+<div class="tabs">
+<button class="tab active" data-view="learn">Learn</button>
+<button class="tab" data-view="build">Build</button>
+<button class="tab" data-view="match">Match</button>
+<button class="tab" data-view="quiz">Quiz</button>
+<button class="tab" data-view="progress">Progress</button><button class="tab" data-view="review">Review</button><button class="tab" data-view="coach">Coach</button>
+</div>
+
+<section id="learnView" class="panel">
+<p class="kicker">STEP 1 · LEARN A WORD</p>
+<div class="lesson">
+<div class="wordcard">
+<span class="tag" id="wordType">word</span>
+<div class="word" id="word">hello</div>
+<p class="pron" id="pron">/hello/</p>
+<p class="meaning" id="meaning">হ্যালো</p>
+<div class="row"><button class="btn secondary" id="speak">🔊 শুনুন</button><button class="btn primary" id="know">আমি জানি →</button></div>
+</div>
+<div class="wordcard">
+<div class="example"><small>REAL EXAMPLE</small><p id="exampleEn">Hello! How are you?</p><span id="exampleBn">হ্যালো! তুমি কেমন আছো?</span></div>
+<div class="example"><small>REMEMBER</small><p>শব্দটি শুধু মুখস্থ করো না—একটি sentence-এ ব্যবহার করো।</p></div>
+<button class="btn secondary" id="again" style="width:100%;margin-top:13px">↻ আবার দেখাও</button>
+</div>
+</div>
+</section>
+
+<section id="buildView" class="panel" style="display:none">
+<p class="kicker">STEP 2 · USE THE WORD</p><h2>আগে Pattern, তারপর Sentence</h2>
+<p class="muted">VocabX random শব্দ জোড়া দেবে না। Pattern অনুযায়ী শুধু ব্যবহারযোগ্য choice দেখাবে।</p>
+<div class="patterns">
+<button class="pattern active" data-pattern="want"><b>I want to + verb</b><small>আমি ... করতে চাই</small></button>
+<button class="pattern" data-pattern="svo"><b>Subject + verb + object</b><small>আমি পানি খাই</small></button>
+<button class="pattern" data-pattern="adj"><b>Subject + be + adjective</b><small>আমি খুশি</small></button>
+<button class="pattern" data-pattern="beNoun"><b>Subject + be + noun</b><small>আমি একজন ছাত্র</small></button>
+</div>
+<div class="builder">
+<div class="step"><span>1</span><div><label>WHO?</label><select id="gSub"></select></div></div>
+<div class="step"><span>2</span><div><label id="verbLabel">WHAT DO YOU WANT TO DO?</label><select id="gVerb"></select></div></div>
+<div class="step" id="objStep"><span>3</span><div><label>WHAT?</label><select id="gObj"></select></div></div>
+<div class="step"><span>4</span><div><label>WHEN / WHERE <small>(optional)</small></label><select id="gExtra"></select></div></div>
+</div>
+<div id="validation" class="validation good">✓ এই pattern-এর choices ব্যবহার করে valid sentence তৈরি করা যাবে।</div>
+<button class="btn primary" id="makeSentence" style="width:100%;margin-top:10px">✨ Sentence তৈরি করো</button>
+<div class="result"><small style="color:var(--primary);font-weight:900">YOUR SENTENCE</small><p class="en" id="genEn">I want to learn English.</p><p class="bn" id="genBn">আমি ইংরেজি শিখতে চাই।</p><div class="why"><b>WHY?</b><span id="why">want-এর পরে <strong>to + verb</strong> ব্যবহার করা হয়েছে।</span></div></div>
+<div class="practice">
+<p class="kicker">STEP 3 · TRY YOURSELF</p><h3>এবার তুমি নিজে বানাও</h3>
+<p class="muted">উপরের pattern দেখে নিজের sentence লিখো। VocabX ভুল হলে কারণসহ feedback দেবে।</p>
+<input class="input" id="userSentence" placeholder="I want to learn English.">
+<button class="btn secondary" id="check" style="width:100%;margin-top:10px">✓ Check my sentence</button>
+<div class="feedback" id="feedback"></div>
+</div>
+</section>
+
+
+<section id="matchView" class="panel" style="display:none">
+<p class="kicker">STEP 2 · MATCH THE WORDS</p>
+<div class="match-head">
+  <div>
+    <h2>Side-by-Side Matching</h2>
+    <p class="muted">English word-টি বেছে নিয়ে তার সঠিক বাংলা অর্থটি খুঁজে বের করো।</p>
+  </div>
+  <div style="display:flex;gap:7px;align-items:center"><button class="icon" id="matchSoundToggle" title="Matching sound">🔊</button><div class="match-progress"><b id="matchProgress">0/5</b><small>matched</small></div></div>
+</div>
+
+<div class="match-board">
+  <div class="match-column">
+    <div class="match-title">ENGLISH</div>
+    <div id="englishCards" class="match-list"></div>
+  </div>
+  <div class="match-column">
+    <div class="match-title">বাংলা</div>
+    <div id="banglaCards" class="match-list"></div>
+  </div>
+</div>
+
+<div id="matchStatus" class="match-status">একটি English word নির্বাচন করো।</div>
+<button class="btn primary match-next" id="matchNext" disabled>এগিয়ে যাও →</button>
+</section>
+<section id="quizView" class="quiz-panel panel" style="display:none">
+<div class="quiz-card">
+  <div class="quiz-head">
+    <div>
+      <p class="quiz-kicker">প্রশ্ন ১ / ১০</p>
+      <h2>আজকের Quiz</h2>
+      <p class="quiz-sub">শব্দটি দেখে সঠিক বাংলা অর্থটি বেছে নাও।</p>
+    </div>
+    <div class="quiz-score"><b><span id="quizScore">0</span>/10</b><small>স্কোর</small></div>
+  </div>
+  <div class="quiz-progress"><div id="quizProgressBar"></div></div>
+
+  <div id="quizArea">
+    <div class="quiz-question-card">
+      <div class="quiz-question-label" id="quizQuestionSub">সঠিক বাংলা অর্থটি বেছে নাও।</div>
+      <div class="quiz-question" id="quizQuestion">লোড হচ্ছে...</div>
+      <div class="quiz-options" id="quizOptions"></div>
+    </div>
+    <div class="quiz-status" id="quizStatus">একটি উত্তর নির্বাচন করো।</div>
+    <button class="quiz-next" id="quizNext" disabled>পরের প্রশ্ন →</button>
+  </div>
+</div>
+</section>
+<section id="progressView" class="panel" style="display:none">
+<p class="kicker">YOUR LEARNING</p><h2>আজকের Progress</h2><p class="muted">তুমি কী শিখছো, কোথায় ভুল হচ্ছে এবং কোন শব্দগুলো আবার review করা দরকার—সব এক জায়গায়।</p>
+<div class="stat-grid">
+<div class="stat-card"><small>আজকের সঠিক</small><b id="statRight">0</b><span>answers</span></div>
+<div class="stat-card"><small>আজকের ভুল</small><b id="statWrong">0</b><span>answers</span></div>
+<div class="stat-card"><small>Accuracy</small><b id="statAccuracy">0%</b><span>আজ</span></div>
+<div class="stat-card"><small>Words learned</small><b id="statLearned">0</b><span>unique words</span></div>
+</div>
+<div class="today-card"><div class="today-head"><b>Daily Goal</b><span id="dailyGoalText">0 / 10</span></div><div class="mini-track"><div class="mini-fill" id="dailyFill"></div></div><small class="muted">আজ ১০টি meaningful practice complete করার লক্ষ্য।</small></div>
+<div class="today-card"><div class="today-head"><b>Smart Review</b><span class="badge due" id="dueCount">0 due</span></div><p class="muted" style="margin:8px 0 0">যে শব্দগুলো ভুল হচ্ছে, সেগুলো আগে review হবে।</p><div class="review-list" id="reviewList"></div></div>
+</section>
+
+<section id="reviewView" class="panel" style="display:none">
+<p class="kicker">SMART REVIEW</p>
+<h2>আজ যা review করা দরকার</h2>
+<p class="muted">তোমার ভুল, mastery এবং আগের performance দেখে VocabX নিজে থেকে শব্দ বেছে নিচ্ছে।</p>
+<div class="stat-grid">
+<div class="stat-card"><small>Due now</small><b id="reviewDueBig">0</b><span>words</span></div>
+<div class="stat-card"><small>Mastered</small><b id="reviewMastered">0</b><span>words</span></div>
+<div class="stat-card"><small>Streak</small><b id="reviewStreak">0</b><span>days</span></div>
+<div class="stat-card"><small>Accuracy</small><b id="reviewAccuracy">0%</b><span>all time</span></div>
+</div>
+<div class="today-card">
+<div class="today-head"><b>Priority Review</b><span class="badge due" id="reviewPriorityLabel">Start</span></div>
+<div id="priorityWords" class="review-list"></div>
+<button class="btn primary" id="startReview" style="width:100%;margin-top:10px">Review শুরু করি →</button>
+</div>
+<div class="today-card">
+<div class="today-head"><b>Mastery</b><span class="muted">0 → 5</span></div>
+<div id="masteryBars"></div>
+</div>
+</section>
+
+<section id="coachView" class="panel" style="display:none">
+  <p class="kicker">LEARNING COACH</p>
+  <h2>আজকের ছোট, smart session</h2>
+  <p class="muted">কম চাপ, বেশি recall। VocabX তোমার আগের performance দেখে session ছোট বা কঠিন করবে।</p>
+
+  <div class="stat-grid">
+    <div class="stat-card"><small>Today's plan</small><b id="coachPlan">0/8</b><span>steps</span></div>
+    <div class="stat-card"><small>Confidence</small><b id="coachConfidence">—</b><span>last check</span></div>
+    <div class="stat-card"><small>At risk</small><b id="coachRisk">0</b><span>words</span></div>
+    <div class="stat-card"><small>Mastered</small><b id="coachMastered">0</b><span>words</span></div>
+  </div>
+
+  <div class="today-card">
+    <div class="today-head"><b>Quick Win</b><span class="badge strong">5 min</span></div>
+    <p id="quickWinText" class="muted">৩টি সহজ review দিয়ে শুরু করো।</p>
+    <button class="btn primary" id="quickWinBtn" style="width:100%">Quick Win শুরু করি →</button>
+  </div>
+
+  <div class="today-card">
+    <div class="today-head"><b>Confidence Check</b><span class="muted">Answer করার পর</span></div>
+    <p class="muted">তুমি উত্তরটি কতটা নিশ্চিতভাবে জানলে?</p>
+    <div class="confidence-row">
+      <button class="confidence-btn" data-confidence="1">Guessing</button>
+      <button class="confidence-btn" data-confidence="2">Probably</button>
+      <button class="confidence-btn" data-confidence="3">Sure</button>
+    </div>
+    <p id="confidenceFeedback" class="muted"></p>
+  </div>
+
+  <div class="today-card">
+    <div class="today-head"><b>Words to strengthen</b><span class="muted">No pressure</span></div>
+    <div id="coachWeakWords" class="review-list"></div>
+  </div>
+
+  <div class="today-card">
+    <div class="today-head"><b>Teach Back</b><span class="badge due">Recall</span></div>
+    <p id="teachWord" style="font-size:22px;font-weight:900;margin:8px 0">Need</p>
+    <p class="muted">নিজের ভাষায় এই শব্দের অর্থ/ব্যবহার মনে মনে ব্যাখ্যা করো। তারপর নিচের button চাপো।</p>
+    <button class="btn" id="teachReveal">Example দেখাও</button>
+    <div id="teachExample" class="example-box" style="display:none;margin-top:10px"></div>
+  </div>
+</section>
+<section id="searchView" class="panel" style="display:none">
+<p class="kicker">VOCABULARY</p><h2>Everyday Words</h2><p class="muted">English অথবা বাংলা দিয়ে search করো।</p>
+<div class="search">⌕ <input id="searchInput" placeholder="Search word..."></div>
+<div class="results" id="results"></div>
+</section>
+
+<footer><span>VocabX v4.1</span><span>Learn • Use • Practice • Remember</span></footer>
+</div>
+<script src="vocabx.js" defer></script>
+</body>
+</html>
