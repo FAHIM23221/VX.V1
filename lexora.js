@@ -35,7 +35,7 @@ function getWordState(word){
   return vxState.words[word];
 }
 function masteryLabel(m){return ["New","Learning","Familiar","Strong","Mastered"][Math.max(0,Math.min(4,m))]||"New"}
-function saveVX(){localStorage.setItem(VX_KEY,JSON.stringify(vxState));renderProgress();renderSmartReview()}
+function saveVX(){localStorage.setItem(VX_KEY,JSON.stringify(vxState));renderProgress();renderSmartReview(); if(typeof window.lexoraCloudSave === "function") window.lexoraCloudSave();}
 function recordAnswer(word,ok){
   const d=todayKey();
   if(!vxState.days[d]) vxState.days[d]={right:0,wrong:0,practice:0,learnedWords:[]};
@@ -112,6 +112,7 @@ function setConfidence(v){
   vxState.confidenceHistory.push({v,t:Date.now()});
   if(vxState.confidenceHistory.length>50) vxState.confidenceHistory.shift();
   localStorage.setItem(VX_KEY,JSON.stringify(vxState));
+  if(typeof window.lexoraCloudSave === "function") window.lexoraCloudSave();
   if($("confidenceFeedback")) $("confidenceFeedback").textContent=
     v===3?"ভালো। তবে Lexora mastery ঠিক করবে actual recall দিয়ে।":v===2?"ভালো—পরেরবার context-এও recall করো।":"ঠিক আছে—এই ধরনের শব্দকে আমরা একটু বেশি review করব।";
   renderCoach();
@@ -588,28 +589,218 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
 };
 
 
-/* ===== Lexora Account System (email OR phone + password, no OTP) ===== */
+/* ===== Lexora Firebase Account + Cloud Sync ===== */
 (function(){
- const USERS_KEY='lexora_accounts_v1', SESSION_KEY='lexora_session_v1';
- const $=id=>document.getElementById(id);
- const load=()=>JSON.parse(localStorage.getItem(USERS_KEY)||'[]');
- const save=x=>localStorage.setItem(USERS_KEY,JSON.stringify(x));
- const normalizePhone=x=>(x||'').replace(/[^0-9+]/g,'').replace(/^\+880/,'0');
- const validPhone=x=>/^01[3-9]\d{8}$/.test(normalizePhone(x));
- const email=x=>(x||'').trim().toLowerCase();
- const session=()=>{try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{return null}};
- let mode='signup';
- function setMode(m){mode=m;$('loginTab').classList.toggle('active',m==='login');$('signupTab').classList.toggle('active',m==='signup');$('nameField').classList.toggle('hidden',m==='login');$('confirmField').classList.toggle('hidden',m==='login');$('authTitle').textContent=m==='login'?'Welcome back':'Create your account';$('authSub').textContent=m==='login'?'Email বা mobile number + password দিয়ে login করো।':'Email বা mobile number দিয়ে account তৈরি করো। OTP লাগবে না।';$('authSubmit').textContent=m==='login'?'Login':'Create Account';$('authPassword').autocomplete=m==='login'?'current-password':'new-password';$('authMsg').textContent='';}
- function showMsg(t,c){$('authMsg').textContent=t;$('authMsg').className='auth-msg '+(c||'');}
- function openAuth(){ $('authOverlay').classList.remove('hidden'); }
- function closeAuth(){ $('authOverlay').classList.add('hidden'); }
- function applySession(){const s=session(); if(s){$('accountName').textContent=s.name||'Account';$('accountBtn').textContent='Logout';closeAuth();}else{$('accountName').textContent='';$('accountBtn').textContent='Account';openAuth();}}
- function login(u){localStorage.setItem(SESSION_KEY,JSON.stringify({id:u.id,name:u.name,email:u.email,phone:u.phone}));applySession();}
- $('loginTab').onclick=()=>setMode('login'); $('signupTab').onclick=()=>setMode('signup');
- $('authForm').onsubmit=e=>{e.preventDefault(); const name=$('authName').value.trim(), em=email($('authEmail').value), ph=normalizePhone($('authPhone').value), pw=$('authPassword').value; let users=load();
-   if(mode==='signup'){const cp=$('authConfirm').value;if(!name)return showMsg('নাম দাও।','bad');if(!em&&!ph)return showMsg('Email অথবা mobile number অন্তত একটি দাও।','bad');if(em&&!/^\S+@\S+\.\S+$/.test(em))return showMsg('Email format ঠিক নয়।','bad');if(ph&&!validPhone(ph))return showMsg('Mobile number format ঠিক নয়।','bad');if(pw.length<6)return showMsg('Password কমপক্ষে 6 characters হতে হবে।','bad');if(pw!==cp)return showMsg('দুটি password মেলেনি।','bad');if(users.some(u=>(em&&u.email===em)||(ph&&u.phone===ph)))return showMsg('এই email বা mobile number দিয়ে account আগে থেকেই আছে।','bad');const u={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name,email:em,phone:ph,password:btoa(unescape(encodeURIComponent(pw))),createdAt:Date.now()};users.push(u);save(users);login(u);}
-   else {const ident=($('authEmail').value||'').trim();const p=ident.includes('@')?email(ident):normalizePhone(ident);const u=users.find(x=>(x.email===p||x.phone===p));if(!u)return showMsg('Account পাওয়া যায়নি।','bad');if(u.password!==btoa(unescape(encodeURIComponent(pw))))return showMsg('Password সঠিক নয়।','bad');login(u);}
- };
- $('accountBtn').onclick=()=>{if(session()){localStorage.removeItem(SESSION_KEY);applySession();}else openAuth();};
- setMode('signup'); applySession();
+  const firebaseConfig=window.LEXORA_FIREBASE_CONFIG;
+  const USERS_KEY_PREFIX="lexora_user_";
+  let currentUser=null;
+  let syncing=false;
+
+  function msg(text, cls){
+    const el=$("authMsg");
+    if(!el) return;
+    el.textContent=text||"";
+    el.className="auth-msg "+(cls||"");
+  }
+  function normalizePhone(v){
+    let x=(v||"").replace(/[^0-9+]/g,"");
+    if(x.startsWith("+880")) x="0"+x.slice(4);
+    return x;
+  }
+  function validPhone(v){return /^01[3-9]\d{8}$/.test(normalizePhone(v));}
+  function normalizeEmail(v){return (v||"").trim().toLowerCase();}
+  function identifierKey(type,value){return `${type}_${encodeURIComponent(value).replace(/%/g,"_")}`.slice(0,120);}
+  function localKey(uid){return USERS_KEY_PREFIX+uid;}
+  function showApp(){
+    $("authOverlay")?.classList.add("hidden");
+    if($("accountName")) $("accountName").textContent=currentUser?.displayName||"Account";
+    if($("accountBtn")) $("accountBtn").textContent="Logout";
+  }
+  function showAuth(){
+    $("authOverlay")?.classList.remove("hidden");
+    if($("accountName")) $("accountName").textContent="";
+    if($("accountBtn")) $("accountBtn").textContent="Account";
+  }
+  function saveLocalSnapshot(){
+    if(!currentUser) return;
+    const snap={index,learned,vxState,updatedAt:Date.now()};
+    localStorage.setItem(localKey(currentUser.uid),JSON.stringify(snap));
+    localStorage.setItem("lexora_index",String(index));
+    localStorage.setItem("lexora_learned",JSON.stringify(learned));
+    localStorage.setItem(VX_KEY,JSON.stringify(vxState));
+  }
+  function restoreLocalSnapshot(){
+    if(!currentUser) return;
+    try{
+      const snap=JSON.parse(localStorage.getItem(localKey(currentUser.uid))||"null");
+      if(!snap) return;
+      if(Array.isArray(snap.learned)) learned=snap.learned;
+      if(typeof snap.index==="number") index=snap.index;
+      if(snap.vxState && typeof snap.vxState==="object") vxState=snap.vxState;
+    }catch(e){}
+  }
+  async function cloudSave(){
+    if(!currentUser || syncing || !window.lexoraDb) return;
+    saveLocalSnapshot();
+    try{
+      await window.lexoraDb.collection("users").doc(currentUser.uid).set({
+        name:currentUser.displayName||"",
+        email:currentUser.email||"",
+        phone:currentUser.phoneNumber||currentUser._lexoraPhone||"",
+        index,
+        learned,
+        vxState,
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      },{merge:true});
+    }catch(e){console.warn("Lexora cloud save failed",e);}
+  }
+  window.lexoraCloudSave=cloudSave;
+
+  async function cloudLoad(user){
+    if(!window.lexoraDb) return;
+    try{
+      const ref=window.lexoraDb.collection("users").doc(user.uid);
+      const snap=await ref.get();
+      if(snap.exists){
+        const d=snap.data();
+        if(Array.isArray(d.learned)) learned=d.learned;
+        if(typeof d.index==="number") index=d.index;
+        if(d.vxState && typeof d.vxState==="object") vxState=d.vxState;
+      }else{
+        await ref.set({name:user.displayName||"",email:user.email||"",phone:user._lexoraPhone||"",index,learned,vxState,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      }
+      saveLocalSnapshot();
+      renderWord(); renderProgress(); renderSmartReview(); renderCoach();
+    }catch(e){
+      console.warn("Lexora cloud load failed",e);
+      restoreLocalSnapshot();
+      renderWord(); renderProgress(); renderSmartReview(); renderCoach();
+      msg("Cloud data load হয়নি। Offline copy দিয়ে চালু হয়েছে।","bad");
+    }
+  }
+
+  async function createAccount(name,email,phone,password){
+    const cred=await firebase.auth().createUserWithEmailAndPassword(email,password);
+    const user=cred.user;
+    await user.updateProfile({displayName:name});
+    user._lexoraPhone=phone;
+    currentUser=user;
+    // Create private profile first.
+    await window.lexoraDb.collection("users").doc(user.uid).set({name,email,phone,index,learned,vxState,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    // Phone identifier is used only for phone -> email lookup during password login.
+    // Firestore rules should allow public GET but never public LIST/WRITE.
+    await window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("phone",phone)).set({authEmail:email,uid:user.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    if(email) await window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("email",email)).set({authEmail:email,uid:user.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    saveLocalSnapshot();
+  }
+
+  async function loginWithIdentifier(identifier,password){
+    const raw=identifier.trim();
+    if(raw.includes("@")){
+      await firebase.auth().signInWithEmailAndPassword(normalizeEmail(raw),password);
+      return;
+    }
+    const phone=normalizePhone(raw);
+    if(!validPhone(phone)) throw Object.assign(new Error("invalid-phone"),{code:"lexora/invalid-phone"});
+    const ref=window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("phone",phone));
+    const snap=await ref.get();
+    if(!snap.exists) throw Object.assign(new Error("account-not-found"),{code:"auth/user-not-found"});
+    const d=snap.data();
+    await firebase.auth().signInWithEmailAndPassword(d.authEmail,password);
+    const u=firebase.auth().currentUser;
+    if(u) u._lexoraPhone=phone;
+  }
+
+  function setMode(mode){
+    $("loginTab").classList.toggle("active",mode==="login");
+    $("signupTab").classList.toggle("active",mode==="signup");
+    $("nameField").classList.toggle("hidden",mode==="login");
+    $("confirmField").classList.toggle("hidden",mode==="login");
+    $("phoneField").classList.toggle("hidden",mode==="login");
+    $("identifierLabel").textContent=mode==="login"?"Email or Mobile number":"Email";
+    $("authTitle").textContent=mode==="login"?"Welcome back":"Create your account";
+    $("authSub").textContent=mode==="login"?"Email অথবা mobile number + password দিয়ে login করো।":"Email + mobile number দিয়ে account তৈরি করো। OTP লাগবে না।";
+    $("authSubmit").textContent=mode==="login"?"Login":"Create Account";
+    $("authPassword").autocomplete=mode==="login"?"current-password":"new-password";
+    msg("");
+    window.__lexoraAuthMode=mode;
+  }
+
+  function firebaseMessage(e){
+    const code=e?.code||"";
+    const map={
+      "auth/email-already-in-use":"এই email দিয়ে account আগে থেকেই আছে।",
+      "auth/invalid-email":"Email format ঠিক নয়।",
+      "auth/weak-password":"Password আরও শক্তিশালী করো (কমপক্ষে 6 characters)।",
+      "auth/user-not-found":"Account পাওয়া যায়নি।",
+      "auth/wrong-password":"Password সঠিক নয়।",
+      "auth/invalid-credential":"Email/Phone অথবা Password সঠিক নয়।",
+      "auth/network-request-failed":"Internet connection check করো।",
+      "lexora/invalid-phone":"Mobile number format ঠিক নয়।"
+    };
+    return map[code]||e?.message||"Authentication-এ সমস্যা হয়েছে।";
+  }
+
+  $("loginTab").onclick=()=>setMode("login");
+  $("signupTab").onclick=()=>setMode("signup");
+  $("authForm").onsubmit=async e=>{
+    e.preventDefault(); msg("Checking...",""); $("authSubmit").disabled=true;
+    try{
+      if(!window.lexoraAuth || !window.lexoraDb) throw new Error("Firebase এখনো initialize হয়নি।");
+      const mode=window.__lexoraAuthMode||"signup";
+      const name=$("authName").value.trim();
+      const email=normalizeEmail($("authEmail").value);
+      const phone=normalizePhone($("authPhone").value);
+      const password=$("authPassword").value;
+      if(mode==="signup"){
+        if(!name) throw new Error("নাম দাও।");
+        if(!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Valid email দাও।");
+        if(!phone || !validPhone(phone)) throw new Error("Valid Bangladeshi mobile number দাও।");
+        if(password.length<6) throw new Error("Password কমপক্ষে 6 characters হতে হবে।");
+        if(password!==$("authConfirm").value) throw new Error("দুটি password মেলেনি।");
+        // Prevent duplicate phone identifiers before creating auth user.
+        const phoneRef=window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("phone",phone));
+        const existing=await phoneRef.get();
+        if(existing.exists) throw new Error("এই mobile number দিয়ে account আগে থেকেই আছে।");
+        await createAccount(name,email,phone,password);
+        msg("Account তৈরি হয়েছে।","good");
+      }else{
+        const identifier=$("authEmail").value.trim();
+        if(!identifier) throw new Error("Email অথবা mobile number দাও।");
+        await loginWithIdentifier(identifier,password);
+        msg("Login successful.","good");
+      }
+    }catch(err){
+      console.error(err);
+      msg(firebaseMessage(err),"bad");
+      $("authSubmit").disabled=false;
+    }
+  };
+
+  $("accountBtn").onclick=async()=>{
+    if(currentUser){await firebase.auth().signOut();return;}
+    showAuth();
+  };
+
+  if(!window.firebase || !firebaseConfig){
+    msg("Firebase SDK/config পাওয়া যায়নি।","bad");
+    return;
+  }
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    window.lexoraAuth=firebase.auth();
+    window.lexoraDb=firebase.firestore();
+    lexoraAuth.onAuthStateChanged(async user=>{
+      currentUser=user;
+      if(!user){showAuth();return;}
+      try{
+        await cloudLoad(user);
+        showApp();
+      }catch(e){console.error(e);showApp();}
+    });
+  }catch(e){
+    console.error(e);
+    msg("Firebase initialize করা যায়নি।","bad");
+  }
+  setMode("signup");
 })();
