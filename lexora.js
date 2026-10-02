@@ -589,18 +589,21 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
 };
 
 
-/* ===== Lexora Firebase Account + Cloud Sync ===== */
+/* ===== Lexora Firebase Account + Cloud Sync / Profile / Admin ===== */
 (function(){
   const firebaseConfig=window.LEXORA_FIREBASE_CONFIG;
   const USERS_KEY_PREFIX="lexora_user_";
   let currentUser=null;
+  let currentProfile={};
   let syncing=false;
+  let isAdmin=false;
 
+  const el=id=>document.getElementById(id);
   function msg(text, cls){
-    const el=$("authMsg");
-    if(!el) return;
-    el.textContent=text||"";
-    el.className="auth-msg "+(cls||"");
+    const node=el("authMsg");
+    if(!node)return;
+    node.textContent=text||"";
+    node.className="auth-msg "+(cls||"");
   }
   function normalizePhone(v){
     let x=(v||"").replace(/[^0-9+]/g,"");
@@ -611,18 +614,21 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
   function normalizeEmail(v){return (v||"").trim().toLowerCase();}
   function identifierKey(type,value){return `${type}_${encodeURIComponent(value).replace(/%/g,"_")}`.slice(0,120);}
   function localKey(uid){return USERS_KEY_PREFIX+uid;}
+
   function showApp(){
-    $("authOverlay")?.classList.add("hidden");
-    if($("accountName")) $("accountName").textContent=currentUser?.displayName||"Account";
-    if($("accountBtn")) $("accountBtn").textContent="Logout";
+    el("authOverlay")?.classList.add("hidden");
+    if(el("accountName")) el("accountName").textContent=currentUser?.displayName||currentProfile.name||"Profile";
+    if(el("accountBtn")) el("accountBtn").textContent="Profile";
+    if(el("adminBtn")) el("adminBtn").classList.toggle("hidden",!isAdmin);
   }
   function showAuth(){
-    $("authOverlay")?.classList.remove("hidden");
-    if($("accountName")) $("accountName").textContent="";
-    if($("accountBtn")) $("accountBtn").textContent="Account";
+    el("authOverlay")?.classList.remove("hidden");
+    if(el("accountName")) el("accountName").textContent="";
+    if(el("accountBtn")) el("accountBtn").textContent="Profile";
+    if(el("adminBtn")) el("adminBtn").classList.add("hidden");
   }
   function saveLocalSnapshot(){
-    if(!currentUser) return;
+    if(!currentUser)return;
     const snap={index,learned,vxState,updatedAt:Date.now()};
     localStorage.setItem(localKey(currentUser.uid),JSON.stringify(snap));
     localStorage.setItem("lexora_index",String(index));
@@ -630,52 +636,55 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
     localStorage.setItem(VX_KEY,JSON.stringify(vxState));
   }
   function restoreLocalSnapshot(){
-    if(!currentUser) return;
+    if(!currentUser)return;
     try{
-      const snap=JSON.parse(localStorage.getItem(localKey(currentUser.uid))||"null");
-      if(!snap) return;
-      if(Array.isArray(snap.learned)) learned=snap.learned;
-      if(typeof snap.index==="number") index=snap.index;
-      if(snap.vxState && typeof snap.vxState==="object") vxState=snap.vxState;
-    }catch(e){}
+      const snap=JSON.parse(localStorage.getItem(localKey(currentUser.uid)||"null"));
+      if(!snap)return;
+      if(Array.isArray(snap.learned))learned=snap.learned;
+      if(typeof snap.index==="number")index=snap.index;
+      if(snap.vxState&&typeof snap.vxState==="object")vxState=snap.vxState;
+    }catch(e){console.warn(e)}
   }
   async function cloudSave(){
-    if(!currentUser || syncing || !window.lexoraDb) return;
+    if(!currentUser||syncing||!window.lexoraDb)return;
     saveLocalSnapshot();
     try{
+      syncing=true;
       await window.lexoraDb.collection("users").doc(currentUser.uid).set({
-        name:currentUser.displayName||"",
-        email:currentUser.email||"",
-        phone:currentUser.phoneNumber||currentUser._lexoraPhone||"",
-        index,
-        learned,
-        vxState,
+        name:currentUser.displayName||currentProfile.name||"",
+        email:currentUser.email||currentProfile.email||"",
+        phone:currentProfile.phone||currentUser._lexoraPhone||"",
+        index,learned,vxState,
         updatedAt:firebase.firestore.FieldValue.serverTimestamp()
       },{merge:true});
-    }catch(e){console.warn("Lexora cloud save failed",e);}
+      currentProfile={...currentProfile,name:currentUser.displayName||currentProfile.name||"",email:currentUser.email||currentProfile.email||"",phone:currentProfile.phone||currentUser._lexoraPhone||""};
+    }catch(e){console.warn("Lexora cloud save failed",e)}
+    finally{syncing=false}
   }
   window.lexoraCloudSave=cloudSave;
 
   async function cloudLoad(user){
-    if(!window.lexoraDb) return;
+    if(!window.lexoraDb)return;
     try{
       const ref=window.lexoraDb.collection("users").doc(user.uid);
       const snap=await ref.get();
       if(snap.exists){
-        const d=snap.data();
-        if(Array.isArray(d.learned)) learned=d.learned;
-        if(typeof d.index==="number") index=d.index;
-        if(d.vxState && typeof d.vxState==="object") vxState=d.vxState;
+        const d=snap.data()||{};
+        currentProfile=d;
+        if(d.phone)user._lexoraPhone=d.phone;
+        if(Array.isArray(d.learned))learned=d.learned;
+        if(typeof d.index==="number")index=d.index;
+        if(d.vxState&&typeof d.vxState==="object")vxState=d.vxState;
       }else{
-        await ref.set({name:user.displayName||"",email:user.email||"",phone:user._lexoraPhone||"",index,learned,vxState,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+        currentProfile={name:user.displayName||"",email:user.email||"",phone:user._lexoraPhone||""};
+        await ref.set({...currentProfile,index,learned,vxState,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
       }
       saveLocalSnapshot();
-      renderWord(); renderProgress(); renderSmartReview(); renderCoach();
+      renderWord();renderProgress();renderSmartReview();renderCoach();
     }catch(e){
       console.warn("Lexora cloud load failed",e);
       restoreLocalSnapshot();
-      renderWord(); renderProgress(); renderSmartReview(); renderCoach();
-      msg("Cloud data load হয়নি। Offline copy দিয়ে চালু হয়েছে।","bad");
+      renderWord();renderProgress();renderSmartReview();renderCoach();
     }
   }
 
@@ -685,12 +694,10 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
     await user.updateProfile({displayName:name});
     user._lexoraPhone=phone;
     currentUser=user;
-    // Create private profile first.
+    currentProfile={name,email,phone};
     await window.lexoraDb.collection("users").doc(user.uid).set({name,email,phone,index,learned,vxState,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-    // Phone identifier is used only for phone -> email lookup during password login.
-    // Firestore rules should allow public GET but never public LIST/WRITE.
     await window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("phone",phone)).set({authEmail:email,uid:user.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    if(email) await window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("email",email)).set({authEmail:email,uid:user.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("email",email)).set({authEmail:email,uid:user.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     saveLocalSnapshot();
   }
 
@@ -701,27 +708,28 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
       return;
     }
     const phone=normalizePhone(raw);
-    if(!validPhone(phone)) throw Object.assign(new Error("invalid-phone"),{code:"lexora/invalid-phone"});
-    const ref=window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("phone",phone));
-    const snap=await ref.get();
-    if(!snap.exists) throw Object.assign(new Error("account-not-found"),{code:"auth/user-not-found"});
-    const d=snap.data();
+    if(!validPhone(phone))throw Object.assign(new Error("invalid-phone"),{code:"lexora/invalid-phone"});
+    const snap=await window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("phone",phone)).get();
+    if(!snap.exists)throw Object.assign(new Error("account-not-found"),{code:"auth/user-not-found"});
+    const d=snap.data()||{};
     await firebase.auth().signInWithEmailAndPassword(d.authEmail,password);
     const u=firebase.auth().currentUser;
-    if(u) u._lexoraPhone=phone;
+    if(u)u._lexoraPhone=phone;
   }
 
   function setMode(mode){
-    $("loginTab").classList.toggle("active",mode==="login");
-    $("signupTab").classList.toggle("active",mode==="signup");
-    $("nameField").classList.toggle("hidden",mode==="login");
-    $("confirmField").classList.toggle("hidden",mode==="login");
-    $("phoneField").classList.toggle("hidden",mode==="login");
-    $("identifierLabel").textContent=mode==="login"?"Email or Mobile number":"Email";
-    $("authTitle").textContent=mode==="login"?"Welcome back":"Create your account";
-    $("authSub").textContent=mode==="login"?"Email অথবা mobile number + password দিয়ে login করো।":"Email + mobile number দিয়ে account তৈরি করো। OTP লাগবে না।";
-    $("authSubmit").textContent=mode==="login"?"Login":"Create Account";
-    $("authPassword").autocomplete=mode==="login"?"current-password":"new-password";
+    const login=mode==="login";
+    el("loginTab")?.classList.toggle("active",login);
+    el("signupTab")?.classList.toggle("active",!login);
+    el("nameField")?.classList.toggle("hidden",login);
+    el("confirmField")?.classList.toggle("hidden",login);
+    el("phoneField")?.classList.toggle("hidden",login);
+    if(el("identifierLabel"))el("identifierLabel").textContent=login?"Email or Mobile number":"Email";
+    if(el("authTitle"))el("authTitle").textContent=login?"Welcome back":"Create your account";
+    if(el("authSub"))el("authSub").textContent=login?"Email অথবা mobile number + password দিয়ে login করো।":"Email + mobile number দিয়ে account তৈরি করো। OTP লাগবে না।";
+    if(el("authSubmit"))el("authSubmit").textContent=login?"Login":"Create Account";
+    if(el("authEmail"))el("authEmail").placeholder=login?"Email or 01XXXXXXXXX":"you@example.com";
+    if(el("authPassword"))el("authPassword").autocomplete=login?"current-password":"new-password";
     msg("");
     window.__lexoraAuthMode=mode;
   }
@@ -736,70 +744,129 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
       "auth/wrong-password":"Password সঠিক নয়।",
       "auth/invalid-credential":"Email/Phone অথবা Password সঠিক নয়।",
       "auth/network-request-failed":"Internet connection check করো।",
+      "auth/too-many-requests":"অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করো।",
+      "permission-denied":"Firebase Firestore Rules-এ permission দেওয়া হয়নি।",
       "lexora/invalid-phone":"Mobile number format ঠিক নয়।"
     };
     return map[code]||e?.message||"Authentication-এ সমস্যা হয়েছে।";
   }
 
-  $("loginTab").onclick=()=>setMode("login");
-  $("signupTab").onclick=()=>setMode("signup");
-  $("authForm").onsubmit=async e=>{
-    e.preventDefault(); msg("Checking...",""); $("authSubmit").disabled=true;
+  async function checkAdmin(){
+    isAdmin=false;
+    if(!currentUser||!window.lexoraDb)return false;
     try{
-      if(!window.lexoraAuth || !window.lexoraDb) throw new Error("Firebase এখনো initialize হয়নি।");
+      const snap=await window.lexoraDb.collection("admins").doc(currentUser.uid).get();
+      isAdmin=snap.exists;
+      if(snap.exists)currentProfile={...currentProfile,admin:true};
+    }catch(e){console.warn("Admin check failed",e)}
+    return isAdmin;
+  }
+
+  function initials(name){
+    return (name||"L").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase()||"L";
+  }
+  function profileHTML(){
+    const total=vxState.right+vxState.wrong;
+    const accuracy=total?Math.round(vxState.right/total*100):0;
+    return `<div class="profile-head"><div class="profile-avatar">${initials(currentProfile.name||currentUser?.displayName)}</div><div><div class="profile-value">${escapeHtml(currentProfile.name||currentUser?.displayName||"Learner")}</div><div class="profile-label">Lexora learner ${isAdmin?"· Admin":""}</div></div></div><div class="profile-grid" style="margin-top:16px"><div class="profile-card"><div class="profile-label">Email</div><div>${escapeHtml(currentProfile.email||currentUser?.email||"—")}</div></div><div class="profile-card"><div class="profile-label">Mobile number</div><div>${escapeHtml(currentProfile.phone||"—")}</div></div><div class="profile-card"><div class="profile-label">Words learned</div><div class="profile-value">${learned.length}</div></div><div class="profile-card"><div class="profile-label">Practice accuracy</div><div class="profile-value">${accuracy}%</div></div><div class="profile-card"><div class="profile-label">Current streak</div><div class="profile-value">${streakDays()} days</div></div><div class="profile-card"><div class="profile-label">Total practice</div><div class="profile-value">${total}</div></div></div><div class="profile-card" style="margin-top:12px"><div class="profile-label">Change display name</div><div style="display:flex;gap:8px;margin-top:8px"><input id="profileNameInput" value="${escapeAttr(currentProfile.name||currentUser?.displayName||"")}" style="flex:1;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text)"><button type="button" class="btn primary" id="saveProfileName">Save</button></div><p id="profileMsg" class="muted" style="margin:8px 0 0"></p></div><button type="button" class="btn secondary" id="profileLogout" style="width:100%;margin-top:12px">Log out</button>`;
+  }
+  function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
+  function escapeAttr(v){return escapeHtml(v);}
+  function openProfile(){
+    const m=el("profileModal");if(!m)return;
+    el("profileContent").innerHTML=profileHTML();m.classList.remove("hidden");
+    el("saveProfileName").onclick=async()=>{
+      const name=el("profileNameInput").value.trim();
+      if(!name){el("profileMsg").textContent="নাম খালি রাখা যাবে না।";return;}
+      try{
+        await currentUser.updateProfile({displayName:name});
+        await window.lexoraDb.collection("users").doc(currentUser.uid).set({name,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+        currentProfile.name=name;showApp();el("profileMsg").textContent="Profile updated.";
+      }catch(e){el("profileMsg").textContent=firebaseMessage(e)}
+    };
+    el("profileLogout").onclick=()=>firebase.auth().signOut();
+  }
+
+  async function openAdmin(){
+    if(!isAdmin)return;
+    const m=el("adminModal");if(!m)return;
+    m.classList.remove("hidden");
+    const box=el("adminContent");box.innerHTML="<p class='muted'>Loading users...</p>";
+    try{
+      const snap=await window.lexoraDb.collection("users").orderBy("createdAt","desc").limit(100).get();
+      const users=snap.docs.map(d=>({id:d.id,...d.data()}));
+      const total=users.length;
+      let learnedTotal=0,practiceTotal=0;
+      users.forEach(u=>{learnedTotal+=(Array.isArray(u.learned)?u.learned.length:0);const x=u.vxState||{};practiceTotal+=(Number(x.right)||0)+(Number(x.wrong)||0)});
+      box.innerHTML=`<div class="admin-grid"><div class="admin-card"><div class="profile-label">Users loaded</div><div class="admin-stat">${total}</div></div><div class="admin-card"><div class="profile-label">Words learned</div><div class="admin-stat">${learnedTotal}</div></div><div class="admin-card"><div class="profile-label">Practice answers</div><div class="admin-stat">${practiceTotal}</div></div><div class="admin-card"><div class="profile-label">Your role</div><div class="admin-stat" style="font-size:22px">ADMIN</div></div></div><input id="adminSearch" class="admin-search" placeholder="Search name, email or mobile..."><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>Words</th><th>Practice</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div>`;
+      const render=()=>{const q=(el("adminSearch").value||"").toLowerCase();el("adminUsersBody").innerHTML=users.filter(u=>`${u.name||""} ${u.email||""} ${u.phone||""}`.toLowerCase().includes(q)).map(u=>{const x=u.vxState||{};return `<tr><td>${escapeHtml(u.name||"—")}</td><td>${escapeHtml(u.email||"—")}</td><td>${escapeHtml(u.phone||"—")}</td><td>${Array.isArray(u.learned)?u.learned.length:0}</td><td>${(Number(x.right)||0)+(Number(x.wrong)||0)}</td></tr>`}).join("")||'<tr><td colspan="5">No users found.</td></tr>';};
+      el("adminSearch").oninput=render;render();
+    }catch(e){box.innerHTML=`<p class="auth-msg bad">Admin data load failed: ${escapeHtml(firebaseMessage(e))}</p>`;}
+  }
+
+  el("loginTab")?.addEventListener("click",()=>setMode("login"));
+  el("signupTab")?.addEventListener("click",()=>setMode("signup"));
+  el("accountBtn")?.addEventListener("click",openProfile);
+  el("adminBtn")?.addEventListener("click",openAdmin);
+  el("profileClose")?.addEventListener("click",()=>el("profileModal")?.classList.add("hidden"));
+  el("adminClose")?.addEventListener("click",()=>el("adminModal")?.classList.add("hidden"));
+  ["profileModal","adminModal"].forEach(id=>el(id)?.addEventListener("click",e=>{if(e.target.id===id)e.currentTarget.classList.add("hidden")}));
+
+  el("authForm")?.addEventListener("submit",async e=>{
+    e.preventDefault();
+    const submit=el("authSubmit");
+    if(submit)submit.disabled=true;
+    msg("Checking...","");
+    try{
+      if(!window.lexoraAuth||!window.lexoraDb)throw new Error("Firebase এখনো initialize হয়নি।");
       const mode=window.__lexoraAuthMode||"signup";
-      const name=$("authName").value.trim();
-      const email=normalizeEmail($("authEmail").value);
-      const phone=normalizePhone($("authPhone").value);
-      const password=$("authPassword").value;
+      const name=el("authName").value.trim();
+      const identifier=el("authEmail").value.trim();
+      const email=normalizeEmail(identifier);
+      const phone=normalizePhone(el("authPhone").value);
+      const password=el("authPassword").value;
       if(mode==="signup"){
-        if(!name) throw new Error("নাম দাও।");
-        if(!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Valid email দাও।");
-        if(!phone || !validPhone(phone)) throw new Error("Valid Bangladeshi mobile number দাও।");
-        if(password.length<6) throw new Error("Password কমপক্ষে 6 characters হতে হবে।");
-        if(password!==$("authConfirm").value) throw new Error("দুটি password মেলেনি।");
-        // Prevent duplicate phone identifiers before creating auth user.
-        const phoneRef=window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("phone",phone));
-        const existing=await phoneRef.get();
-        if(existing.exists) throw new Error("এই mobile number দিয়ে account আগে থেকেই আছে।");
+        if(!name)throw new Error("নাম দাও।");
+        if(!/^\S+@\S+\.\S+$/.test(email))throw new Error("Valid email দাও।");
+        if(!validPhone(phone))throw new Error("Valid Bangladeshi mobile number দাও।");
+        if(password.length<6)throw new Error("Password কমপক্ষে 6 characters হতে হবে।");
+        if(password!==el("authConfirm").value)throw new Error("দুটি password মেলেনি।");
+        const phoneSnap=await window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("phone",phone)).get();
+        if(phoneSnap.exists)throw new Error("এই mobile number দিয়ে account আগে থেকেই আছে।");
+        const emailSnap=await window.lexoraDb.collection("loginIdentifiers").doc(identifierKey("email",email)).get();
+        if(emailSnap.exists)throw new Error("এই email দিয়ে account আগে থেকেই আছে।");
         await createAccount(name,email,phone,password);
         msg("Account তৈরি হয়েছে।","good");
       }else{
-        const identifier=$("authEmail").value.trim();
-        if(!identifier) throw new Error("Email অথবা mobile number দাও।");
+        if(!identifier)throw new Error("Email অথবা mobile number দাও।");
+        if(!password)throw new Error("Password দাও।");
         await loginWithIdentifier(identifier,password);
         msg("Login successful.","good");
       }
     }catch(err){
-      console.error(err);
+      console.error("Lexora auth error",err);
       msg(firebaseMessage(err),"bad");
-      $("authSubmit").disabled=false;
+      if(submit)submit.disabled=false;
     }
-  };
+  });
 
-  $("accountBtn").onclick=async()=>{
-    if(currentUser){await firebase.auth().signOut();return;}
-    showAuth();
-  };
-
-  if(!window.firebase || !firebaseConfig){
-    msg("Firebase SDK/config পাওয়া যায়নি।","bad");
-    return;
-  }
+  if(!window.firebase||!firebaseConfig){msg("Firebase SDK/config পাওয়া যায়নি।","bad");return;}
   try{
-    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
     window.lexoraAuth=firebase.auth();
     window.lexoraDb=firebase.firestore();
-    lexoraAuth.onAuthStateChanged(async user=>{
+    window.lexoraAuth.onAuthStateChanged(async user=>{
       currentUser=user;
-      if(!user){showAuth();return;}
+      if(!user){isAdmin=false;showAuth();if(el("authSubmit"))el("authSubmit").disabled=false;return;}
       try{
         await cloudLoad(user);
+        await checkAdmin();
         showApp();
       }catch(e){console.error(e);showApp();}
+      if(el("authSubmit"))el("authSubmit").disabled=false;
     });
   }catch(e){
-    console.error(e);
+    console.error("Firebase initialization error",e);
     msg("Firebase initialize করা যায়নি।","bad");
   }
   setMode("signup");
