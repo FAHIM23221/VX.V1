@@ -174,7 +174,7 @@ window.LEXORA_FIREBASE_CONFIG = {
 </head>
 <body>
 <div id="authOverlay" class="auth-overlay"><div class="auth-card"><div class="auth-logo"><span class="logo">L</span>Lexora</div><p class="kicker">YOUR LEARNING SPACE</p><h2 id="authTitle">Create your account</h2><p class="muted" id="authSub">Email + mobile number দিয়ে account তৈরি করো। OTP লাগবে না।</p><div class="auth-tabs"><button id="loginTab">Login</button><button id="signupTab" class="active">Sign up</button></div><form id="authForm"><div id="nameField" class="auth-field"><label>Full name</label><input id="authName" autocomplete="name" placeholder="Your name"></div><div class="auth-field"><label id="identifierLabel">Email or Mobile number</label><input id="authEmail" type="text" autocomplete="username" placeholder="Email or 01XXXXXXXXX"></div><div id="phoneField" class="auth-field"><label>Mobile number</label><input id="authPhone" type="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></div><div class="auth-field"><label>Password</label><input id="authPassword" type="password" autocomplete="new-password" placeholder="At least 6 characters"></div><div id="confirmField" class="auth-field"><label>Confirm password</label><input id="authConfirm" type="password" autocomplete="new-password" placeholder="Repeat password"></div><div id="authMsg" class="auth-msg"></div><button class="btn primary" id="authSubmit" type="submit" style="width:100%">Create Account</button></form><p class="muted" style="font-size:11px;margin-top:14px">Firebase Authentication + Firestore connected. Login: Email অথবা Mobile number + Password. OTP লাগবে না।</p></div></div><div class="app">
-<header><div class="brand"><span class="logo">L</span><span>Lexora</span><span class="admin-header-label">ADMIN</span></div><div class="account-chip"><span id="accountName" class="muted"></span><button id="accountBtn">Profile</button><button id="logoutBtn" class="hidden">Logout</button><button class="icon" id="theme">☾</button></div></header>
+<header><div class="brand"><span class="logo">L</span><span>Lexora</span></div><div class="account-chip"><span id="accountName" class="muted"></span><button id="accountBtn" type="button" onclick="window.lexoraOpenProfile && window.lexoraOpenProfile()">Profile</button><button id="logoutBtn" type="button" class="hidden" onclick="window.lexoraLogout && window.lexoraLogout()">Logout</button><button class="icon" id="theme">☾</button></div></header>
 
 <section class="hero">
 <p class="kicker">ENGLISH FROM ZERO</p>
@@ -1304,6 +1304,48 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
   setMode("signup");
 })();
 
+</script>
+<script>
+/* Lexora emergency-safe header actions: intentionally independent of the main app script. */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function openProfile(){
+    document.querySelectorAll('.panel').forEach(function(p){ p.style.display='none'; });
+    var view=$('profileView');
+    if(view) view.style.display='block';
+    var u=window.lexoraCurrentUser || (window.firebase && firebase.auth && firebase.auth().currentUser);
+    if(!u){
+      var overlay=$('authOverlay'); if(overlay) overlay.classList.remove('hidden');
+      return;
+    }
+    var name=(u.displayName||'').trim() || '—';
+    if($('profileName')) $('profileName').textContent=name;
+    if($('profileEmail')) $('profileEmail').textContent=u.email||'—';
+    if($('profilePhone')) $('profilePhone').textContent=u._lexoraPhone||u.phoneNumber||'—';
+    if($('profileRole')) $('profileRole').textContent=(String(u.email||'').toLowerCase()==='fahim500k@gmail.com')?'Admin':'User';
+    window.scrollTo(0,0);
+  }
+  async function logout(){
+    var btn=$('logoutBtn');
+    if(btn) btn.disabled=true;
+    try{
+      if(typeof window.lexoraCloudSave==='function') { try{ await window.lexoraCloudSave(); }catch(e){} }
+      if(window.firebase && firebase.auth){ await firebase.auth().signOut(); }
+      else { localStorage.removeItem('lexora_auth'); location.reload(); }
+    }catch(e){
+      console.error('Lexora logout:',e);
+      if(btn) btn.disabled=false;
+      alert('Logout করা যায়নি। আবার চেষ্টা করো।');
+    }
+  }
+  window.lexoraOpenProfile=openProfile;
+  window.lexoraLogout=logout;
+  document.addEventListener('DOMContentLoaded',function(){
+    var p=$('accountBtn'), l=$('logoutBtn');
+    if(p){p.type='button';p.onclick=function(e){e.preventDefault();openProfile();};}
+    if(l){l.type='button';l.onclick=function(e){e.preventDefault();logout();};}
+  });
+})();
 </script>
 </body>
 </html>
