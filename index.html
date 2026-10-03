@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#5b5ce2">
 <title>Lexora — Learn English Naturally</title>
-<meta name="lexora-version" content="1.1-auth-fixed-single-file">
+<meta name="lexora-version" content="1.1-user-panel-split">
 <style>
 :root{--bg:#f7f8fc;--card:#fff;--text:#121522;--muted:#72798b;--line:#e7e9f0;--primary:#5b5ce2;--soft:#eef0ff;--ok:#15803d;--bad:#b42318;--shadow:0 12px 40px rgba(20,25,50,.08)}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -152,25 +152,8 @@ footer{padding:20px 0;color:var(--muted);font-size:12px;display:flex;justify-con
 .confidence-btn:hover{transform:translateY(-1px)}
 .example-box{padding:12px;border-radius:12px;background:var(--soft);line-height:1.6}
 
-.auth-overlay{position:fixed;inset:0;background:rgba(247,248,252,.96);backdrop-filter:blur(10px);z-index:100;display:grid;place-items:center;padding:18px}.auth-card{width:min(430px,100%);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:var(--shadow)}.auth-logo{display:flex;align-items:center;gap:10px;font-weight:950;font-size:24px;margin-bottom:18px}.auth-logo .logo{width:42px;height:42px}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--soft);padding:4px;border-radius:12px;margin:16px 0}.auth-tabs button{border:0;background:transparent;padding:10px;border-radius:9px;font-weight:850;color:var(--muted)}.auth-tabs button.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(20,25,50,.06)}.auth-field{margin:12px 0}.auth-field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}.auth-field input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);outline:none}.auth-field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(91,92,226,.1)}.auth-msg{min-height:22px;margin:8px 0;font-size:13px}.auth-msg.bad{color:var(--bad)}.auth-msg.good{color:var(--ok)}.account-chip{display:flex;align-items:center;gap:8px;margin-left:auto}.account-chip button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 10px;font-weight:800;cursor:pointer}.hidden{display:none!important}
-/* ===== Strict User/Admin UI separation ===== */
-body.admin-mode .hero,
-body.admin-mode .progress,
-body.admin-mode .tabs,
-body.admin-mode #learnView,
-body.admin-mode #buildView,
-body.admin-mode #matchView,
-body.admin-mode #searchView,
-body.admin-mode #quizView,
-body.admin-mode #progressView,
-body.admin-mode #reviewView,
-body.admin-mode #coachView{display:none!important}
-body.admin-mode .admin-only{display:block!important}
-.admin-header-label{display:none;color:var(--primary);font-size:12px;font-weight:900;letter-spacing:1px}
-body.admin-mode .admin-header-label{display:inline}
-body.admin-mode .brand i{display:none}
-
-.profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.profile-box{border:1px solid var(--line);border-radius:18px;padding:16px;background:var(--card)}.profile-box label{display:block;font-size:11px;font-weight:900;color:var(--muted);margin-bottom:5px}.profile-box b{font-size:16px}.admin-only{display:none}.admin-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.admin-toolbar input{flex:1;min-width:180px}.user-table{width:100%;border-collapse:collapse;font-size:13px}.user-table th,.user-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}.user-table th{font-size:10px;color:var(--muted);text-transform:uppercase}.user-table button{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 9px;font-weight:800}.admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.admin-stat{padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--soft)}.admin-stat small{display:block;color:var(--muted)}.admin-stat b{display:block;font-size:25px;margin-top:4px}.danger{color:var(--bad)!important}.status-pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900}.status-active{background:#e8f7ee;color:#16723d}.status-banned{background:#fde8e8;color:#a52222}.admin-actions{display:flex;gap:6px;flex-wrap:wrap}.admin-actions button{cursor:pointer}.notice{padding:12px;border-radius:13px;background:var(--soft);font-size:13px}.modal-actions{display:flex;gap:8px;margin-top:12px}@media(max-width:650px){.lesson{grid-template-columns:1fr}.profile-grid,.admin-stats{grid-template-columns:1fr}.user-table{display:block;overflow:auto;white-space:nowrap}}
+.auth-overlay{position:fixed;inset:0;background:rgba(247,248,252,.96);backdrop-filter:blur(10px);z-index:100;display:grid;place-items:center;padding:18px}.auth-card{width:min(430px,100%);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:var(--shadow)}.auth-logo{display:flex;align-items:center;gap:10px;font-weight:950;font-size:24px;margin-bottom:18px}.auth-logo .logo{width:42px;height:42px}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--soft);padding:4px;border-radius:12px;margin:16px 0}.auth-tabs button{border:0;background:transparent;padding:10px;border-radius:9px;font-weight:850;color:var(--muted)}.auth-tabs button.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(20,25,50,.06)}.auth-field{margin:12px 0}.auth-field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}.auth-field input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);outline:none}.auth-field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(91,92,226,.1)}.auth-msg{min-height:22px;margin:8px 0;font-size:13px}.auth-msg.bad{color:var(--bad)}.auth-msg.good{color:var(--ok)}.account-chip{display:flex;align-items:center;gap:8px;margin-left:auto} .account-chip #accountName{max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}.account-chip button{white-space:nowrap;flex-shrink:0}@media(max-width:600px){header{gap:8px}.brand{flex-shrink:0}.account-chip{gap:6px}.account-chip #accountName{max-width:88px;font-size:12px}.account-chip #accountBtn{padding:8px 9px}.account-chip #logoutBtn{padding:8px 9px}.account-chip .icon{width:40px;height:40px}}@media(max-width:390px){.account-chip #accountName{max-width:70px}.account-chip #accountBtn{font-size:12px}.account-chip #logoutBtn{font-size:12px}}.account-chip button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 10px;font-weight:800;cursor:pointer}.hidden{display:none!important}
+.profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.profile-box{border:1px solid var(--line);border-radius:18px;padding:16px;background:var(--card)}.profile-box label{display:block;font-size:11px;font-weight:900;color:var(--muted);margin-bottom:5px}.profile-box b{font-size:16px}@media(max-width:650px){.lesson{grid-template-columns:1fr}.profile-grid,.admin-stats{grid-template-columns:1fr}.user-table{display:block;overflow:auto;white-space:nowrap}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -395,18 +378,7 @@ window.LEXORA_FIREBASE_CONFIG = {
 <div id="passwordMsg" class="auth-msg"></div><button class="btn primary" id="changePasswordBtn">Change Password</button></div>
 </section>
 
-<section id="adminView" class="panel admin-only" style="display:none">
-<p class="kicker">ADMIN CONTROL</p><h2>Lexora Admin Panel</h2><p class="muted">এখানে শুধু administration ও user-management tools থাকবে। User-এর learning interface এখানে থাকবে না।</p>
-<div class="admin-toolbar"><button class="btn primary" id="adminUsersBtn" type="button">User Management</button><button class="btn secondary" id="adminReloadBtn" type="button">Reload Data</button></div>
-<div class="admin-stats"><div class="admin-stat"><small>Total users</small><b id="adminUserCount">0</b></div><div class="admin-stat"><small>Active users</small><b id="adminActiveCount">0</b></div><div class="admin-stat"><small>Banned users</small><b id="adminBannedCount">0</b></div></div>
-<div class="admin-toolbar"><input class="input" id="adminSearch" placeholder="Search name, email or phone..."><button class="btn secondary" id="adminRefresh">Refresh</button></div>
-<div id="adminMsg" class="auth-msg"></div>
-<div style="overflow:auto"><table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminUserRows"></tbody></table></div>
-<div id="adminSelected" class="today-card" style="display:none;margin-top:14px"><div class="today-head"><b>User Details</b><button id="adminCloseSelected" class="icon" style="width:auto;height:auto;padding:7px 10px">Close</button></div>
-<div class="profile-grid"><div class="profile-box"><label>NAME</label><b id="selectedName">—</b></div><div class="profile-box"><label>EMAIL</label><b id="selectedEmail">—</b></div><div class="profile-box"><label>PHONE</label><b id="selectedPhone">—</b></div><div class="profile-box"><label>UID</label><b id="selectedUid">—</b></div><div class="profile-box"><label>STATUS</label><b id="selectedStatus">—</b></div><div class="profile-box"><label>JOINED</label><b id="selectedJoined">—</b></div><div class="profile-box"><label>LAST UPDATED</label><b id="selectedUpdated">—</b></div><div class="profile-box"><label>WORDS LEARNED</label><b id="selectedWords">0</b></div><div class="profile-box"><label>PROGRESS</label><b id="selectedProgress">0%</b></div><div class="profile-box"><label>STREAK</label><b id="selectedStreak">0 days</b></div></div>
-<div class="modal-actions"><button class="btn secondary" id="adminPdfBtn" type="button">Download User PDF</button><button class="btn secondary" id="adminBanBtn" type="button">Ban User</button><button class="btn secondary" id="adminUnbanBtn" type="button" style="display:none">Unban User</button></div><div id="adminActionMsg" class="auth-msg"></div></div>
-<div id="pdfReport" style="position:fixed;left:-10000px;top:0;width:760px;background:#fff;color:#111;padding:36px;font-family:Arial,sans-serif;z-index:-1"><h1 style="margin:0 0 6px">LEXORA — USER REPORT</h1><p style="margin:0 0 24px;color:#666">Generated from Lexora Admin Panel</p><h2 style="margin:0 0 12px">Account Information</h2><div id="pdfAccount"></div><h2 style="margin:24px 0 12px">Learning Statistics</h2><div id="pdfLearning"></div><p style="margin-top:28px;color:#777;font-size:12px">Lexora • User report</p></div>
-</section>
+
 <section id="searchView" class="panel" style="display:none">
 <p class="kicker">VOCABULARY</p><h2>Everyday Words</h2><p class="muted">English অথবা বাংলা দিয়ে search করো।</p>
 <div class="search">⌕ <input id="searchInput" placeholder="Search word..."></div>
@@ -1036,24 +1008,9 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
     if($("accountBtn")) $("accountBtn").textContent="Profile";
     if($("logoutBtn")) $("logoutBtn").classList.remove("hidden");
     window.lexoraCurrentUser=currentUser;
-    window.lexoraIsAdmin=normalizeEmail(currentUser?.email||"")===ADMIN_EMAIL;
-
-    if(window.lexoraIsAdmin){
-      // Admin gets a completely separate interface. Learning features are hidden.
-      document.body.classList.add("admin-mode");
-      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-      document.querySelectorAll(".panel").forEach(p=>{ if(p.id!=="adminView" && p.id!=="profileView") p.style.display="none"; });
-      openAdminView();
-    }else{
-      document.body.classList.remove("admin-mode");
-      $("adminView")?.style.setProperty("display","none");
-      // Normal users only see learning features.
-      document.querySelectorAll(".tab").forEach(t=>{
-        if(t.id==="adminTab") t.remove();
-      });
-      const first=document.querySelector('.tab[data-view="learn"]');
-      if(first) first.click();
-    }
+    window.lexoraIsAdmin=false;
+    const first=document.querySelector('.tab[data-view="learn"]');
+    if(first) first.click();
   }
   function showAuth(){
     document.body.classList.remove("admin-mode");
@@ -1247,33 +1204,6 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
   function userProgress(u){const n=Array.isArray(u.learned)?u.learned.length:0;const t=Array.isArray(WORDS)?WORDS.length:0;return t?Math.min(100,Math.round(n/t*100)):0;}
   function userStreak(u){const x=u.vxState||{};return Number(x.streak||x.currentStreak||0)||0;}
   function isBanned(u){return u.status==="banned"||u.banned===true;}
-  async function loadAdminUsers(){
-    if(!currentUser||normalizeEmail(currentUser.email)!==ADMIN_EMAIL)return;
-    const rows=$("adminUserRows"), msgEl=$("adminMsg"); if(!rows)return;
-    msgEl.textContent="Loading users...";msgEl.className="auth-msg";
-    try{
-      const snap=await window.lexoraDb.collection("users").get();window.__lexoraAdminUsers=[];
-      snap.forEach(doc=>{const d=doc.data()||{};if(normalizeEmail(d.email||"")===ADMIN_EMAIL)return;window.__lexoraAdminUsers.push({uid:doc.id,...d});});
-      window.__lexoraAdminUsers.sort((a,b)=>String(a.name||a.email||"").localeCompare(String(b.name||b.email||"")));
-      renderAdminUsers();$("adminUserCount").textContent=String(window.__lexoraAdminUsers.length);$("adminActiveCount").textContent=String(window.__lexoraAdminUsers.filter(u=>!isBanned(u)).length);$("adminBannedCount").textContent=String(window.__lexoraAdminUsers.filter(isBanned).length);
-      msgEl.textContent="Users loaded.";msgEl.className="auth-msg good";
-    }catch(e){console.error(e);msgEl.textContent="Admin data load failed: "+(e.message||e);msgEl.className="auth-msg bad";}
-  }
-  function renderAdminUsers(){
-    const rows=$("adminUserRows");if(!rows)return;const q=($("adminSearch")?.value||"").trim().toLowerCase();
-    const list=(window.__lexoraAdminUsers||[]).filter(u=>`${u.name||""} ${u.email||""} ${u.phone||""} ${u.uid||""}`.toLowerCase().includes(q));
-    rows.innerHTML=list.map(u=>{const banned=isBanned(u);return `<tr><td>${escapeHtml(u.name||"—")}</td><td>${escapeHtml(u.email||"—")}</td><td>${escapeHtml(u.phone||"—")}</td><td><span class="status-pill ${banned?'status-banned':'status-active'}">${banned?'Banned':'Active'}</span></td><td><button data-admin-uid="${escapeHtml(u.uid)}">View</button></td></tr>`;}).join("")||`<tr><td colspan="5">No users found.</td></tr>`;
-  }
-  function selectedUser(){const uid=$("selectedUid")?.textContent||"";return (window.__lexoraAdminUsers||[]).find(x=>x.uid===uid);}
-  function showAdminSelected(u){if(!u)return;const banned=isBanned(u);$("selectedName").textContent=u.name||"—";$("selectedEmail").textContent=u.email||"—";$("selectedPhone").textContent=u.phone||"—";$("selectedUid").textContent=u.uid||"—";$("selectedStatus").textContent=banned?"Banned":"Active";$("selectedJoined").textContent=dateText(u.createdAt);$("selectedUpdated").textContent=dateText(u.updatedAt);$("selectedWords").textContent=String(Array.isArray(u.learned)?u.learned.length:0);$("selectedProgress").textContent=userProgress(u)+"%";$("selectedStreak").textContent=userStreak(u)+" days";$("adminBanBtn").style.display=banned?"none":"inline-block";$("adminUnbanBtn").style.display=banned?"inline-block":"none";$("adminSelected").style.display="block";$("adminActionMsg").textContent="";}
-  async function setUserBanState(uid,banned){if(!currentUser||normalizeEmail(currentUser.email)!==ADMIN_EMAIL)throw new Error("Admin access required.");const u=(window.__lexoraAdminUsers||[]).find(x=>x.uid===uid);if(!u)throw new Error("User not found.");await window.lexoraDb.collection("users").doc(uid).set({status:banned?"banned":"active",banned:!!banned,banUpdatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});u.status=banned?"banned":"active";u.banned=!!banned;renderAdminUsers();$("adminActiveCount").textContent=String((window.__lexoraAdminUsers||[]).filter(x=>!isBanned(x)).length);$("adminBannedCount").textContent=String((window.__lexoraAdminUsers||[]).filter(isBanned).length);showAdminSelected(u);$("adminActionMsg").textContent=banned?"User banned successfully.":"User unbanned successfully.";$("adminActionMsg").className="auth-msg good";}
-  async function downloadUserPdf(u){
-    if(!u)throw new Error("Select a user first.");const report=$("pdfReport");const esc=escapeHtml;
-    $("pdfAccount").innerHTML=`<p><b>Name:</b> ${esc(u.name||"—")}</p><p><b>Email:</b> ${esc(u.email||"—")}</p><p><b>Mobile:</b> ${esc(u.phone||"—")}</p><p><b>UID:</b> ${esc(u.uid||"—")}</p><p><b>Status:</b> ${isBanned(u)?"Banned":"Active"}</p><p><b>Joined:</b> ${esc(dateText(u.createdAt))}</p><p><b>Last updated:</b> ${esc(dateText(u.updatedAt))}</p>`;
-    $("pdfLearning").innerHTML=`<p><b>Words learned:</b> ${Array.isArray(u.learned)?u.learned.length:0}</p><p><b>Progress:</b> ${userProgress(u)}%</p><p><b>Streak:</b> ${userStreak(u)} days</p>`;
-    report.style.left="0";const canvas=await html2canvas(report,{scale:2,backgroundColor:"#ffffff",useCORS:true});report.style.left="-10000px";const {jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:"portrait",unit:"px",format:"a4"});const pageW=pdf.internal.pageSize.getWidth(),pageH=pdf.internal.pageSize.getHeight();const imgW=pageW,imgH=canvas.height*(imgW/canvas.width);let y=0,remaining=imgH;while(remaining>0){pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,y,imgW,imgH);remaining-=pageH;if(remaining>0){y-=pageH;pdf.addPage();}}const safeName=String(u.name||"user").replace(/[^a-z0-9_-]+/gi,"_").slice(0,50)||"user";pdf.save(`Lexora_User_${safeName}.pdf`);
-  }
-  function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function openProfileView(){
     document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
     $("profileView")?.style.setProperty('display','block');
@@ -1283,27 +1213,6 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
     $("profilePhone").textContent=currentUser._lexoraPhone||currentUser.phoneNumber||"—";
     $("profileRole").textContent=normalizeEmail(currentUser.email)===ADMIN_EMAIL?"Admin":"User";
   }
-  function openAdminView(){
-    if(normalizeEmail(currentUser?.email||"")!==ADMIN_EMAIL)return;
-    document.body.classList.add("admin-mode");
-    document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
-    $("adminView")?.style.setProperty('display','block');
-    window.scrollTo({top:0,behavior:'smooth'});
-    loadAdminUsers();
-  }
-  $("accountBtn").onclick=()=>openProfileView();
-  $("logoutBtn").onclick=async()=>{await firebase.auth().signOut();};
-  $("changePasswordBtn")?.addEventListener('click',async()=>{try{await changeOwnPassword();}catch(e){$("passwordMsg").textContent=firebaseMessage(e);$("passwordMsg").className="auth-msg bad";}});
-  $("adminRefresh")?.addEventListener('click',loadAdminUsers);
-  $("adminReloadBtn")?.addEventListener('click',loadAdminUsers);
-  $("adminUsersBtn")?.addEventListener('click',()=>{ $("adminSearch")?.focus(); window.scrollTo({top:document.getElementById("adminUserRows")?.getBoundingClientRect().top + window.scrollY - 120,behavior:"smooth"}); });
-  $("adminSearch")?.addEventListener('input',renderAdminUsers);
-  $("adminCloseSelected")?.addEventListener('click',()=>$("adminSelected").style.display='none');
-  $("adminUserRows")?.addEventListener('click',e=>{const b=e.target.closest('[data-admin-uid]');if(!b)return;const u=(window.__lexoraAdminUsers||[]).find(x=>x.uid===b.dataset.adminUid);showAdminSelected(u);});
-  $("adminBanBtn")?.addEventListener('click',async()=>{const u=selectedUser();if(!u)return;if(!confirm(`Ban ${u.name||u.email||'this user'}?`))return;try{await setUserBanState(u.uid,true);}catch(e){$("adminActionMsg").textContent=e.message||String(e);$("adminActionMsg").className='auth-msg bad';}});
-  $("adminUnbanBtn")?.addEventListener('click',async()=>{const u=selectedUser();if(!u)return;if(!confirm(`Unban ${u.name||u.email||'this user'}?`))return;try{await setUserBanState(u.uid,false);}catch(e){$("adminActionMsg").textContent=e.message||String(e);$("adminActionMsg").className='auth-msg bad';}});
-  $("adminPdfBtn")?.addEventListener('click',async()=>{const u=selectedUser();if(!u)return;const b=$("adminPdfBtn");try{b.disabled=true;b.textContent='Preparing PDF...';await downloadUserPdf(u);}catch(e){console.error(e);$("adminActionMsg").textContent='PDF তৈরি করা যায়নি: '+(e.message||e);$("adminActionMsg").className='auth-msg bad';}finally{b.disabled=false;b.textContent='Download User PDF';}});
-  window.openLexoraAdmin=openAdminView;
   window.openLexoraProfile=openProfileView;
   window.lexoraAdminEmail=ADMIN_EMAIL;
 
@@ -1318,7 +1227,9 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
     lexoraAuth.onAuthStateChanged(async user=>{
       currentUser=user;
       if(!user){showAuth();return;}
+      if(normalizeEmail(user.email||"")===ADMIN_EMAIL){ window.location.href="admin/"; return; }
       try{
+        try{ const ad=await window.lexoraDb.collection("admins").doc(user.uid).get(); if(ad.exists && ad.data()?.status==="active"){ window.location.href="admin/"; return; } }catch(_e){}
         await cloudLoad(user);
         showApp();
       }catch(e){console.error(e);showApp();}
