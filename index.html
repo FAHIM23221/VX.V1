@@ -152,7 +152,7 @@ footer{padding:20px 0;color:var(--muted);font-size:12px;display:flex;justify-con
 .confidence-btn:hover{transform:translateY(-1px)}
 .example-box{padding:12px;border-radius:12px;background:var(--soft);line-height:1.6}
 
-.auth-overlay{position:fixed;inset:0;background:rgba(247,248,252,.96);backdrop-filter:blur(10px);z-index:100;display:grid;place-items:center;padding:18px}.auth-card{width:min(430px,100%);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:var(--shadow)}.auth-logo{display:flex;align-items:center;gap:10px;font-weight:950;font-size:24px;margin-bottom:18px}.auth-logo .logo{width:42px;height:42px}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--soft);padding:4px;border-radius:12px;margin:16px 0}.auth-tabs button{border:0;background:transparent;padding:10px;border-radius:9px;font-weight:850;color:var(--muted)}.auth-tabs button.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(20,25,50,.06)}.auth-field{margin:12px 0}.auth-field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}.auth-field input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);outline:none}.auth-field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(91,92,226,.1)}.auth-msg{min-height:22px;margin:8px 0;font-size:13px}.auth-msg.bad{color:var(--bad)}.auth-msg.good{color:var(--ok)}.account-chip{display:flex;align-items:center;gap:8px;margin-left:auto} .account-chip #accountName{max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}.account-chip button{white-space:nowrap;flex-shrink:0}@media(max-width:600px){header{gap:8px}.brand{flex-shrink:0}.account-chip{gap:6px}.account-chip #accountName{max-width:88px;font-size:12px}.account-chip #accountBtn{padding:8px 9px}.account-chip #logoutBtn{padding:8px 9px}.account-chip .icon{width:40px;height:40px}}@media(max-width:390px){.account-chip #accountName{max-width:70px}.account-chip #accountBtn{font-size:12px}.account-chip #logoutBtn{font-size:12px}}.account-chip button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 10px;font-weight:800;cursor:pointer}.hidden{display:none!important}
+.auth-overlay{position:fixed;inset:0;background:rgba(247,248,252,.96);backdrop-filter:blur(10px);z-index:100;display:grid;place-items:center;padding:18px}.auth-card{width:min(430px,100%);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:var(--shadow)}.auth-logo{display:flex;align-items:center;gap:10px;font-weight:950;font-size:24px;margin-bottom:18px}.auth-logo .logo{width:42px;height:42px}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--soft);padding:4px;border-radius:12px;margin:16px 0}.auth-tabs button{border:0;background:transparent;padding:10px;border-radius:9px;font-weight:850;color:var(--muted)}.auth-tabs button.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(20,25,50,.06)}.auth-field{margin:12px 0}.auth-field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}.auth-field input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);outline:none}.auth-field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(91,92,226,.1)}.auth-msg{min-height:22px;margin:8px 0;font-size:13px}.auth-msg.bad{color:var(--bad)}.auth-msg.good{color:var(--ok)}.account-chip{display:flex;align-items:center;gap:8px;margin-left:auto} .account-chip #accountName{max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:1.1}.account-chip button{white-space:nowrap;flex-shrink:0}@media(max-width:600px){header{gap:8px}.brand{flex-shrink:0}.account-chip{gap:6px}.account-chip #accountName{max-width:88px;font-size:12px}.account-chip #accountBtn{padding:8px 9px}.account-chip #logoutBtn{padding:8px 9px}.account-chip .icon{width:40px;height:40px}}@media(max-width:390px){.account-chip #accountName{max-width:70px}.account-chip #accountBtn{font-size:12px}.account-chip #logoutBtn{font-size:12px}}.account-chip button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 10px;font-weight:800;cursor:pointer}.hidden{display:none!important}
 .profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.profile-box{border:1px solid var(--line);border-radius:18px;padding:16px;background:var(--card)}.profile-box label{display:block;font-size:11px;font-weight:900;color:var(--muted);margin-bottom:5px}.profile-box b{font-size:16px}@media(max-width:650px){.lesson{grid-template-columns:1fr}.profile-grid,.admin-stats{grid-template-columns:1fr}.user-table{display:block;overflow:auto;white-space:nowrap}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -365,7 +365,7 @@ window.LEXORA_FIREBASE_CONFIG = {
 </section>
 
 <section id="profileView" class="panel" style="display:none">
-<p class="kicker">ACCOUNT</p><h2>My Profile</h2><p class="muted">তোমার account information এবং password এখানে manage করতে পারবে।</p>
+<button class="btn secondary" id="profileBackBtn" type="button" style="margin-bottom:12px">← Back to Learning</button><p class="kicker">ACCOUNT</p><h2>My Profile</h2><p class="muted">তোমার account information এবং password এখানে manage করতে পারবে।</p>
 <div class="profile-grid">
  <div class="profile-box"><label>FULL NAME</label><b id="profileName">—</b></div>
  <div class="profile-box"><label>EMAIL</label><b id="profileEmail">—</b></div>
@@ -1215,6 +1215,69 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
   }
   window.openLexoraProfile=openProfileView;
   window.lexoraAdminEmail=ADMIN_EMAIL;
+
+  // Header account actions: these were previously rendered but had no click handlers.
+  const profileBtn = $("accountBtn");
+  if(profileBtn){
+    profileBtn.type = "button";
+    profileBtn.addEventListener("click", (ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(!currentUser){
+        setMode("login");
+        $("authOverlay")?.classList.remove("hidden");
+        return;
+      }
+      openProfileView();
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+  }
+
+  const logoutBtn = $("logoutBtn");
+  if(logoutBtn){
+    logoutBtn.type = "button";
+    logoutBtn.addEventListener("click", async (ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(logoutBtn.disabled) return;
+      logoutBtn.disabled = true;
+      try{
+        await cloudSave();
+        await firebase.auth().signOut();
+      }catch(err){
+        console.error("Logout failed:", err);
+        logoutBtn.disabled = false;
+        alert("Logout করা যায়নি। আবার চেষ্টা করো।");
+      }
+    });
+  }
+
+  const profileBackBtn = $("profileBackBtn");
+  if(profileBackBtn){
+    profileBackBtn.addEventListener("click", ()=>{
+      const first=document.querySelector('.tab[data-view="learn"]');
+      if(first) first.click();
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+  }
+
+  const changePasswordBtn = $("changePasswordBtn");
+  if(changePasswordBtn){
+    changePasswordBtn.type = "button";
+    changePasswordBtn.addEventListener("click", async ()=>{
+      changePasswordBtn.disabled = true;
+      const out = $("passwordMsg");
+      if(out){out.textContent="Changing...";out.className="auth-msg";}
+      try{
+        await changeOwnPassword();
+      }catch(err){
+        console.error("Password change failed:", err);
+        if(out){out.textContent=firebaseMessage(err);out.className="auth-msg bad";}
+      }finally{
+        changePasswordBtn.disabled = false;
+      }
+    });
+  }
 
   if(!window.firebase || !firebaseConfig){
     msg("Firebase SDK/config পাওয়া যায়নি।","bad");
