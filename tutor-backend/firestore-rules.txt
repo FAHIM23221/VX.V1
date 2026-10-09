@@ -1,0 +1,36 @@
+// Firestore Security Rules for AI Tutor
+// Deploy using Firebase CLI: firebase deploy --only firestore:rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User profile (existing)
+    match /users/{uid} {
+      allow read, write: if request.auth.uid == uid;
+      allow list: if request.auth.uid == uid;
+    }
+
+    // Login identifiers (existing)
+    match /loginIdentifiers/{doc=**} {
+      allow get: if true;  // Public GET only (no LIST/WRITE)
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    // AI Tutor Conversations (NEW)
+    match /tutor_conversations/{uid} {
+      // User can only access their own conversations
+      allow read, write: if request.auth.uid == uid;
+      
+      match /chats/{chatId} {
+        allow read, create: if request.auth.uid == uid;
+        allow update, delete: if false;  // Immutable history
+      }
+    }
+
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
