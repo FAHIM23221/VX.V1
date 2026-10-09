@@ -1,0 +1,43 @@
+// Firestore Security Rules for Lexora AI Tutor
+// Deploy using Firebase CLI: firebase deploy --only firestore:rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===== User profiles (existing) =====
+    match /users/{uid} {
+      allow read, write: if request.auth.uid == uid;
+    }
+
+    // ===== Login identifiers (existing) =====
+    match /loginIdentifiers/{doc=**} {
+      allow get: if true;  // Public GET only (no LIST/WRITE)
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    // ===== AI Tutor Conversations (NEW - per-user scope) =====
+    match /tutor_conversations/{uid} {
+      // Only the authenticated user can access their own conversation root
+      allow read, write: if request.auth.uid == uid;
+      
+      match /chats/{chatId} {
+        // User can read and create new chats
+        allow read, create: if request.auth.uid == uid;
+        // Chats are immutable (no updates/deletes to prevent tampering)
+        allow update, delete: if false;
+        // Enforce data validation
+        allow create: if request.resource.data.uid == request.auth.uid
+          && request.resource.data.userMessage is string
+          && request.resource.data.tutorResponse is string
+          && request.resource.data.language in ['en', 'bn']
+          && request.resource.data.timestamp != null;
+      }
+    }
+
+    // ===== Deny all other access =====
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
