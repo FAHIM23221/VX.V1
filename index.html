@@ -164,7 +164,8 @@ body.admin-mode #searchView,
 body.admin-mode #quizView,
 body.admin-mode #progressView,
 body.admin-mode #reviewView,
-body.admin-mode #coachView{display:none!important}
+body.admin-mode #coachView,
+body.admin-mode #tutorView{display:none!important}
 body.admin-mode .admin-only{display:block!important}
 .admin-header-label{display:none;color:var(--primary);font-size:12px;font-weight:900;letter-spacing:1px}
 body.admin-mode .admin-header-label{display:inline}
@@ -172,6 +173,24 @@ body:not(.admin-mode) .admin-header-label{display:none}
 body.admin-mode .brand i{display:none}
 
 .profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.profile-box{border:1px solid var(--line);border-radius:18px;padding:16px;background:var(--card)}.profile-box label{display:block;font-size:11px;font-weight:900;color:var(--muted);margin-bottom:5px}.profile-box b{font-size:16px}.admin-only{display:none}.admin-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.admin-toolbar input{flex:1;min-width:180px}.user-table{width:100%;border-collapse:collapse;font-size:13px}.user-table th,.user-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}.user-table th{font-size:10px;color:var(--muted);text-transform:uppercase}.user-table button{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 9px;font-weight:800}.admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.admin-stat{padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--soft)}.admin-stat small{display:block;color:var(--muted)}.admin-stat b{display:block;font-size:25px;margin-top:4px}.danger{color:var(--bad)!important}.status-pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900}.status-active{background:#e8f7ee;color:#16723d}.status-banned{background:#fde8e8;color:#a52222}.admin-actions{display:flex;gap:6px;flex-wrap:wrap}.admin-actions button{cursor:pointer}.notice{padding:12px;border-radius:13px;background:var(--soft);font-size:13px}.modal-actions{display:flex;gap:8px;margin-top:12px}@media(max-width:650px){.lesson{grid-template-columns:1fr}.profile-grid,.admin-stats{grid-template-columns:1fr}.user-table{display:block;overflow:auto;white-space:nowrap}}
+
+/* ===== Lexora AI English Tutor integration ===== */
+.tutor-shell{display:grid;grid-template-columns:1fr;gap:14px}
+.tutor-config{padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--bg)}
+.tutor-config label{display:block;font-size:12px;font-weight:850;margin-bottom:6px}
+.tutor-config input,.tutor-compose textarea,.tutor-correct textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit}
+.tutor-config .row{display:flex;gap:8px;flex-wrap:wrap}.tutor-config .row button{flex:0 0 auto}
+.tutor-chat{display:flex;flex-direction:column;gap:10px;min-height:180px;max-height:420px;overflow:auto;padding:13px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
+.tutor-msg{max-width:92%;padding:12px 14px;border-radius:15px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.tutor-msg.user{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:5px}
+.tutor-msg.assistant{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px}
+.tutor-compose,.tutor-correct{display:grid;gap:9px;margin-top:12px}
+.tutor-compose textarea,.tutor-correct textarea{min-height:78px;resize:vertical}
+.tutor-status{font-size:13px;line-height:1.5;color:var(--muted);overflow-wrap:anywhere}
+.tutor-actions{display:flex;gap:8px;flex-wrap:wrap}.tutor-actions button{flex:1;min-width:120px}
+.tutor-section-title{font-size:17px;font-weight:900;margin:0 0 8px}
+@media(min-width:760px){.tutor-shell{grid-template-columns:1fr 1fr}.tutor-main{grid-column:1/-1}}
+
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -210,7 +229,7 @@ window.LEXORA_FIREBASE_CONFIG = {
 <button class="tab" data-view="build">Build</button>
 <button class="tab" data-view="match">Match</button>
 <button class="tab" data-view="quiz">Quiz</button>
-<button class="tab" data-view="progress">Progress</button><button class="tab" data-view="review">Review</button><button class="tab" data-view="coach">Coach</button>
+<button class="tab" data-view="progress">Progress</button><button class="tab" data-view="review">Review</button><button class="tab" data-view="coach">Coach</button><button class="tab" data-view="tutor">AI Tutor</button>
 </div>
 
 <section id="learnView" class="panel">
@@ -379,6 +398,41 @@ window.LEXORA_FIREBASE_CONFIG = {
     <p class="muted">নিজের ভাষায় এই শব্দের অর্থ/ব্যবহার মনে মনে ব্যাখ্যা করো। তারপর নিচের button চাপো।</p>
     <button class="btn" id="teachReveal">Example দেখাও</button>
     <div id="teachExample" class="example-box" style="display:none;margin-top:10px"></div>
+  </div>
+</section>
+
+
+<section id="tutorView" class="panel" style="display:none">
+  <p class="kicker">PERSONAL ENGLISH TEACHER</p>
+  <h2>Lexora AI English Tutor</h2>
+  <p class="muted">বাংলায় প্রশ্ন করো, English sentence বুঝে নাও, অথবা নিজের লেখা sentence ঠিক করো। Tutor ব্যবহার করতে একটি deployed backend URL লাগবে।</p>
+  <div class="tutor-config">
+    <label for="tutorApiUrl">Backend API URL (Render service URL)</label>
+    <input id="tutorApiUrl" type="url" inputmode="url" placeholder="https://your-service.onrender.com">
+    <div class="row"><button class="btn secondary" id="tutorSaveUrl" type="button">Save URL</button><button class="btn secondary" id="tutorHealthBtn" type="button">Test connection</button></div>
+    <p class="tutor-status" id="tutorStatus" aria-live="polite">প্রথমে backend deploy করে তার URL এখানে বসাও। API key এখানে দেবে না।</p>
+  </div>
+  <div class="tutor-shell" style="margin-top:14px">
+    <div class="tutor-main">
+      <h3 class="tutor-section-title">Chat with your tutor</h3>
+      <div class="tutor-chat" id="tutorChat" aria-live="polite">
+        <div class="tutor-msg assistant">হ্যালো! 😊 আমি তোমার English tutor. সহজ বাংলায় প্রশ্ন করো—যেমন, “I am happy” বাক্যটির অর্থ কী?</div>
+      </div>
+      <form class="tutor-compose" id="tutorChatForm">
+        <textarea id="tutorMessage" maxlength="500" required placeholder="বাংলা বা English-এ প্রশ্ন লেখো…"></textarea>
+        <div class="tutor-actions"><button class="btn primary" id="tutorSend" type="submit">Send message →</button><button class="btn secondary" id="tutorClear" type="button">Clear chat</button></div>
+      </form>
+    </div>
+    <div>
+      <h3 class="tutor-section-title">Check my sentence</h3>
+      <p class="muted">নিজের English sentence লেখো। Tutor ভুল এবং সঠিক version বুঝিয়ে দেবে।</p>
+      <form class="tutor-correct" id="tutorCorrectForm">
+        <textarea id="tutorSentence" maxlength="500" required placeholder="Example: I am go to school."></textarea>
+        <button class="btn secondary" id="tutorCorrectBtn" type="submit">Correct my sentence</button>
+      </form>
+      <div class="result" id="tutorCorrectionResult" style="display:none;text-align:left"><b>Feedback</b><p id="tutorCorrectionText" style="white-space:pre-wrap;line-height:1.65"></p></div>
+      <div class="today-card"><b>Privacy & safety</b><p class="muted" style="font-size:13px;margin-bottom:0">OpenAI API key backend-এ থাকবে। এই UI-তে শুধু backend URL রাখা হয়। Chat ব্যবহার করতে লগইন করা Firebase account প্রয়োজন।</p></div>
+    </div>
   </div>
 </section>
 
@@ -843,7 +897,7 @@ $("matchNext").onclick=()=>{
 
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");
- ["learn","build","match","search","quiz","progress","review","coach","profile","admin"].forEach(v=>{const el=$(v+"View");if(el)el.style.display=t.dataset.view===v?"block":"none";});
+ ["learn","build","match","search","quiz","progress","review","coach","tutor","profile","admin"].forEach(v=>{const el=$(v+"View");if(el)el.style.display=t.dataset.view===v?"block":"none";});
  if(t.dataset.view==="match") startMatching();
  if(t.dataset.view==="quiz") startQuiz(); if(t.dataset.view==="review") renderSmartReview(); if(t.dataset.view==="coach") renderCoach();
 });
@@ -1384,6 +1438,143 @@ if($("teachReveal")) $("teachReveal").onclick=()=>{
     msg("Firebase initialize করা যায়নি।","bad");
   }
   setMode("signup");
+})();
+
+
+/* ===== AI English Tutor frontend ===== */
+(function initLexoraTutor(){
+  const byId = id => document.getElementById(id);
+  const urlInput = byId("tutorApiUrl");
+  const statusEl = byId("tutorStatus");
+  const chatEl = byId("tutorChat");
+  if (!urlInput || !chatEl) return;
+
+  const storedUrl = localStorage.getItem("lexora_tutor_api_url") || "";
+  urlInput.value = storedUrl;
+
+  function setStatus(message, bad=false){
+    statusEl.textContent = message;
+    statusEl.style.color = bad ? "var(--bad)" : "var(--muted)";
+  }
+  function baseUrl(){
+    return (urlInput.value || "").trim().replace(/\/+$/, "");
+  }
+  function addMessage(role, text){
+    const node = document.createElement("div");
+    node.className = "tutor-msg " + (role === "user" ? "user" : "assistant");
+    node.textContent = String(text || "");
+    chatEl.appendChild(node);
+    chatEl.scrollTop = chatEl.scrollHeight;
+    return node;
+  }
+  async function authToken(){
+    const auth = window.lexoraAuth || (window.firebase && firebase.auth ? firebase.auth() : null);
+    const user = auth && auth.currentUser;
+    if (!user) throw new Error("প্রথমে Lexora account-এ login করো।");
+    return await user.getIdToken();
+  }
+  async function apiRequest(path, body){
+    const base = baseUrl();
+    if (!base) throw new Error("Backend URL বসিয়ে Save URL চাপো।");
+    let token;
+    try { token = await authToken(); }
+    catch(e){ throw e; }
+    const response = await fetch(base + path, {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+      body: JSON.stringify(body)
+    });
+    let data = {};
+    try { data = await response.json(); } catch(_e) {}
+    if (!response.ok && response.status !== 207) {
+      throw new Error(data.error || ("Request failed (" + response.status + ")"));
+    }
+    return data;
+  }
+
+  byId("tutorSaveUrl").addEventListener("click", ()=>{
+    const value = baseUrl();
+    if (!value || !/^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(value)) {
+      setStatus("একটি valid HTTPS backend URL দাও—যেমন https://your-service.onrender.com", true);
+      return;
+    }
+    localStorage.setItem("lexora_tutor_api_url", value);
+    urlInput.value = value;
+    setStatus("Backend URL saved এই browser-এ। এখন Test connection চাপো।");
+  });
+
+  byId("tutorHealthBtn").addEventListener("click", async ()=>{
+    const base = baseUrl();
+    if (!base) { setStatus("আগে backend URL বসাও।", true); return; }
+    setStatus("Connection পরীক্ষা হচ্ছে…");
+    try {
+      const response = await fetch(base + "/health");
+      const data = await response.json();
+      if (!response.ok || data.status !== "ok") throw new Error("Health check failed");
+      setStatus("Connected ✓ AI Tutor backend response দিচ্ছে।");
+    } catch(e) {
+      setStatus("সংযোগ হয়নি: " + (e.message || "Network error") + ". Backend deploy এবং CORS settings পরীক্ষা করো।", true);
+    }
+  });
+
+  byId("tutorChatForm").addEventListener("submit", async event=>{
+    event.preventDefault();
+    const input = byId("tutorMessage");
+    const message = input.value.trim();
+    if (!message) return;
+    addMessage("user", message);
+    input.value = "";
+    const waiting = addMessage("assistant", "একটু অপেক্ষা করো…");
+    byId("tutorSend").disabled = true;
+    try {
+      const data = await apiRequest("/api/tutor/chat", {
+        message,
+        language: /[\u0980-\u09FF]/.test(message) ? "bn" : "en",
+        context: { app: "Lexora", level: "beginner" }
+      });
+      waiting.textContent = data.response || "উত্তর পাওয়া যায়নি।";
+      if (data.warning) setStatus("উত্তর এসেছে, তবে chat history save হয়নি: " + data.warning, true);
+      else setStatus("উত্তর পাওয়া গেছে।");
+    } catch(e) {
+      waiting.textContent = "দুঃখিত, উত্তর পাওয়া যায়নি।";
+      setStatus(e.message || "Tutor request failed.", true);
+    } finally {
+      byId("tutorSend").disabled = false;
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+  });
+
+  byId("tutorClear").addEventListener("click", ()=>{
+    chatEl.replaceChildren();
+    addMessage("assistant", "Chat পরিষ্কার করা হয়েছে। নতুন প্রশ্ন করো।");
+  });
+
+  byId("tutorCorrectForm").addEventListener("submit", async event=>{
+    event.preventDefault();
+    const sentence = byId("tutorSentence").value.trim();
+    if (!sentence) return;
+    const btn = byId("tutorCorrectBtn");
+    const resultBox = byId("tutorCorrectionResult");
+    const resultText = byId("tutorCorrectionText");
+    btn.disabled = true;
+    btn.textContent = "Checking…";
+    resultBox.style.display = "block";
+    resultText.textContent = "একটু অপেক্ষা করো…";
+    try {
+      const data = await apiRequest("/api/tutor/correct", {
+        sentence,
+        language: /[\u0980-\u09FF]/.test(sentence) ? "bn" : "en"
+      });
+      resultText.textContent = data.correction || "Feedback পাওয়া যায়নি।";
+      setStatus("Sentence check সম্পন্ন।");
+    } catch(e) {
+      resultText.textContent = "Sentence check করা যায়নি।";
+      setStatus(e.message || "Correction request failed.", true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Correct my sentence";
+    }
+  });
 })();
 
 </script>
