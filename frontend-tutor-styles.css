@@ -1,0 +1,7 @@
+/* Lexora AI Tutor add-on styles */
+.lexora-tutor h2{margin:0 0 8px}.lexora-tutor label{display:block;font-size:12px;font-weight:800;margin:10px 0 5px}
+.lexora-tutor-messages{display:grid;gap:10px;max-height:48vh;overflow:auto;padding:12px;margin:14px 0;border:1px solid var(--line);border-radius:18px;background:var(--bg)}
+.lexora-tutor-bubble{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px 14px;border-radius:15px;line-height:1.65;max-width:95%}
+.lexora-tutor-bubble.tutor{justify-self:start;background:var(--card);border:1px solid var(--line)}.lexora-tutor-bubble.user{justify-self:end;background:var(--soft);color:var(--text)}
+.lexora-tutor-actions{display:flex;gap:9px;margin-top:10px;flex-wrap:wrap}.lexora-tutor-actions .btn{min-width:125px}
+.lexora-tutor-status{min-height:20px;font-size:12px;color:var(--muted);overflow-wrap:anywhere}.lexora-tutor-status[data-error=true]{color:var(--bad)}
