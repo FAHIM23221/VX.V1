@@ -1,0 +1,20 @@
+{
+  "name": "lexora-ai-tutor-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lexora AI English Tutor API using Gemini and Firebase",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@google/genai": "^1.30.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "firebase-admin": "^13.0.2",
+    "express-rate-limit": "^7.5.0"
+  }
+}
